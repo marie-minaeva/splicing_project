@@ -20,10 +20,6 @@ while [[ "$#" -gt 1 ]]; do
             GENE="$2"
             shift
             ;;
-	-c|--coord)
-	    COORD="$2"
-	    shift
-	    ;;
         *)
             Usage
             ;;
@@ -32,7 +28,8 @@ while [[ "$#" -gt 1 ]]; do
 done
 
 GTEX_GTF=~/splicing_project/gencode.v26.GRCh38.GTExV8.genes.gtf
-GENOME=/Users/littlequeen/splicing_project/Homo_sapiens_assembly38.fasta 
+GENOME=~/splicing_project/Homo_sapiens_assembly38.fasta
+
 # First, get a gtf representation of the file
 export GTF=$(cat <(head -6 $GTEX_GTF) <(grep \"$GENE\" $GTEX_GTF | grep exon))
 
@@ -42,4 +39,4 @@ fi
 # Then use bedtools to pull out the amino acid sequence
 #module load bedtools/2.29.0
 bedtools getfasta -fi $GENOME -bed <(echo "$GTF") -split | fold -w 60 > output.txt
-rm ./Homo_sapiens_assembly38.fasta.fai
+rm ~/splicing_project/Homo_sapiens_assembly38.fasta.fai
