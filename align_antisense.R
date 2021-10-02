@@ -3,7 +3,7 @@ transeq_parse <- function(input) {
         temp = character(0)
         proteins = character(0)
         for (i in 1:nrow(input)){
-                if (startsWith(input[i,], ">_")){
+                if (startsWith(input[i,], ">")){
                         pars = unlist(strsplit(input[i,],split = ":"))[2]
                         pars = unlist(strsplit(pars,split = "-"))
                         proteins = c(proteins, temp)
@@ -20,16 +20,15 @@ transeq_parse <- function(input) {
 }
 
 ## Preprocessing for alignment
-output = read.table("compl_protein_sense_seq.txt")
+output = read.table("compl_protein_antisense_seq.txt")
 proteins = transeq_parse(output)
-print(proteins)
 ## Aligning antisense proteins
 for (k in 1:length(proteins)){
         print("Anti")
         print(proteins[k])
         write(proteins[k], "temp_prot.fa")
         out_path = paste(c("alignment_antisense_", as.character(k),".water"), collapse="")
-        water = c("water -gapopen 10.0 -gapextend 0.5", "temp_prot.fa", "trial_prot_ref.fa", out_path)
+        water = c("water -gapopen 10.0 -gapextend 0.5", "temp_prot.fa", "ref_seq.txt", out_path)
         water =  paste(water, collapse=" ")
         system(water)
         
