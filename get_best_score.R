@@ -1,25 +1,26 @@
+library(stringr)
+
 setwd("~/splicing_project/")
 
 
-## parsing transeq output
-transeq_parse <- function(input) {
-        temp = character(0)        
-        proteins = character(0)
-        for (i in 1:nrow(input)){
-                if (startsWith(input[i,], ">")){
-                        pars = unlist(strsplit(input[i,],split = ":"))[2]
-                        pars = unlist(strsplit(pars,split = "-"))
-                        proteins = c(proteins, temp)
-                        temp = character(0)
-                }else{
-                        temp = c(temp, input[i,])
-                        temp = paste(temp, collapse="")
-                }
-                if (i == nrow(input)){
-                        proteins = c(proteins, temp) 
+## get aligned sequence
+get_seq = function(file){
+        data = readLines(file)
+        protein = character(0)
+        for (i in unlist(strsplit(data[32], " "))){
+                if (nchar(i) >= 3){
+                        protein = c(protein, i)
                 }
         }
-        return(proteins)
+        for (i in unlist(strsplit(data[36], " "))){
+                if (nchar(i) >= 3){
+                        protein = c(protein, i)
+                }
+        }
+        protein = paste(protein, collapse="")
+        print("This is alignment")
+        print(protein)
+        write(protein, "best_aligned_protein.txt")
 }
 
 files = c("alignment_sense_1.water", "alignment_sense_2.water", "alignment_sense_3.water", "alignment_sense_4.water", "alignment_sense_5.water", "alignment_sense_6.water", "alignment_antisense_1.water", "alignment_antisense_2.water", "alignment_antisense_3.water", "alignment_antisense_4.water", "alignment_antisense_5.water", "alignment_antisense_6.water")
@@ -39,12 +40,11 @@ if (file.exists("alignment_sense_1.water")){
         print(scores)
         ## Getting maximum score
         sc = which.max(scores)
-        
         ## Selecting best aligned protein sequence
+        get_seq(files[sc])
+        
+        ## Selecting metadata for the best aligned protein sequence
         if (sc<=6){
-                output = read.table("protein_sense_seq.txt")
-                proteins = transeq_parse(output)
-                write(proteins[sc], "best_aligned_protein.txt")
                 if (sc==1){
                         write(c("5'-3'", "sense", "frame_1"), "best_align_meta.txt")
                 }
@@ -64,9 +64,6 @@ if (file.exists("alignment_sense_1.water")){
                         write(c("3'-5'", "sense", "frame_3"), "best_align_meta.txt")
                 }
         } else {
-                output = read.table("compl_protein_antisense_seq.txt")
-                proteins = transeq_parse(output)
-                write(proteins[sc-6], "best_aligned_protein.txt")
                 if (sc-6==1){
                         write(c("5'-3'", "antisense", "frame_1"), "best_align_meta.txt")
                 }
@@ -91,3 +88,4 @@ if (file.exists("alignment_sense_1.water")){
         write("NOT FOUND", "best_aligned_protein.txt")
         write(c("", "", ""), "best_align_meta.txt")
 }
+

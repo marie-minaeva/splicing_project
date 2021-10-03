@@ -6,9 +6,14 @@ align_meta = readLines("best_align_meta.txt")
 
 protein = readLines("best_aligned_protein.txt")
 
-protein_len = nchar(protein)
 
-exon = 0
+if (protein == "NOT FOUND"){
+        protein_len = ''
+} else {
+        protein_len = nchar(protein)
+}
+
+exon = readLines("exon_meta.txt")
 prot_meta = readLines("protein_meta.txt")
 
 

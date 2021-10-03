@@ -42,7 +42,7 @@ print(needed_coords)
 print(stops)
 print(match(needed_coords[2], stops))
 #rm(output)
-
+write(match(needed_coords[2], stops), "exon_meta.txt")
 needed_exon = exons[match(needed_coords[2], stops)]
 print(needed_exon)
 write(needed_exon, "exon_seq.fa")
