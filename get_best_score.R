@@ -7,20 +7,23 @@ setwd("~/splicing_project/")
 get_seq = function(file){
         data = readLines(file)
         protein = character(0)
-        for (i in unlist(strsplit(data[32], " "))){
-                if (nchar(i) >= 3){
-                        protein = c(protein, i)
-                }
-        }
-        for (i in unlist(strsplit(data[36], " "))){
-                if (nchar(i) >= 3){
-                        protein = c(protein, i)
+        print(length(data))
+        for (j in seq(32, length(data), by=4)){
+                for (i in unlist(strsplit(data[j], " "))){
+                        if (nchar(i) >= 3){
+                                protein = c(protein, i)
+                        }
                 }
         }
         protein = paste(protein, collapse="")
-        print("This is alignment")
-        print(protein)
-        write(protein, "best_aligned_protein.txt")
+        if (str_detect(protein, "-")){
+                write("NOT FOUND", "best_aligned_protein.txt")
+                write(c("", "", ""), "best_align_meta.txt")
+                break
+        } else {
+                protein = gsub("[0-9]", "", protein)
+                write(protein, "best_aligned_protein.txt")
+        }
 }
 
 files = c("alignment_sense_1.water", "alignment_sense_2.water", "alignment_sense_3.water", "alignment_sense_4.water", "alignment_sense_5.water", "alignment_sense_6.water", "alignment_antisense_1.water", "alignment_antisense_2.water", "alignment_antisense_3.water", "alignment_antisense_4.water", "alignment_antisense_5.water", "alignment_antisense_6.water")
@@ -65,22 +68,22 @@ if (file.exists("alignment_sense_1.water")){
                 }
         } else {
                 if (sc-6==1){
-                        write(c("5'-3'", "antisense", "frame_1"), "best_align_meta.txt")
-                }
-                if (sc-6==2){
-                        write(c("5'-3'", "antisense", "frame_2"), "best_align_meta.txt")
-                }
-                if (sc-6==3){
-                        write(c("5'-3'", "antisense", "frame_3"), "best_align_meta.txt")
-                }
-                if (sc-6==4){
                         write(c("3'-5'", "antisense", "frame_1"), "best_align_meta.txt")
                 }
-                if (sc-6==5){
+                if (sc-6==2){
                         write(c("3'-5'", "antisense", "frame_2"), "best_align_meta.txt")
                 }
-                if (sc-6==6){
+                if (sc-6==3){
                         write(c("3'-5'", "antisense", "frame_3"), "best_align_meta.txt")
+                }
+                if (sc-6==4){
+                        write(c("5'-3'", "antisense", "frame_1"), "best_align_meta.txt")
+                }
+                if (sc-6==5){
+                        write(c("5'-3'", "antisense", "frame_2"), "best_align_meta.txt")
+                }
+                if (sc-6==6){
+                        write(c("5'-3'", "antisense", "frame_3"), "best_align_meta.txt")
                 }
         }
         

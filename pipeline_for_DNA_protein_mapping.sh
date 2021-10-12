@@ -1,8 +1,10 @@
 #!/bin/bash
 
-rm output_data.csv
 
-for i in {1..1667}
+# pretraining biomaRt
+Rscript get_biomart_pretrained.R
+
+for i in {1..768}
 	do
 	# Exon extraction
 	echo Exon extraction
