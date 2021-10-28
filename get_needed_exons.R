@@ -1,11 +1,14 @@
 setwd("~/splicing_project/")
+library(stringr)
 
 args <- commandArgs(trailingOnly = TRUE)
 j = as.numeric(args[1])
 
-data = read.table("non_colocalizing_sQTLs.tsv", header=T)
+data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", header=T)
 # Gene name extraction
-gene_name = unlist(strsplit(data$phenotype_id[j],split = "_"))[1]
+#gene_name = unlist(strsplit(data$phenotype_id[j],split = "_"))[1]
+# for non sQTL
+gene_name = unlist(str_split(data$top_pid[j],pattern = "_"))[1]
 gene_name
 bash = c("bash retrieve_nucleotide_sequence_from_genename.sh -g", gene_name)
 bash =  paste(bash, collapse=" ")

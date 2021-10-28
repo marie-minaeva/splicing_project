@@ -1,6 +1,8 @@
+library(stringr)
+
 args <- commandArgs(trailingOnly = TRUE)
 j = as.numeric(args[1])
-data = read.table("non_colocalizing_sQTLs.tsv", header=T)
+data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", header=T)
 
 ## parsing bedtools output
 bedtools_parse = function(input){
@@ -33,18 +35,26 @@ res = bedtools_parse(output)
 starts = unlist(res[1])
 stops = unlist(res[2])
 exons = unlist(res[3])
-pos = as.numeric(unlist(strsplit(data$phenotype_id[j],split = "_"))[2])
+#pos = as.numeric(unlist(strsplit(data$phenotype_id[j],split = "_"))[2])
+# for non sQTL
+pos = as.numeric(unlist(str_split(data$top_pid[j],pattern = "_"))[2])
 pos
 ## needed exon extraction
-#print(data$start[j])
-#needed_coords = unlist(strsplit(data$Exon_coord[j],split = "_"))[2:3]
+# print(data$Exon_coord[j])
+# needed_coords = unlist(strsplit(data$Exon_coord[j],split = "_"))[2:3]
+# print(needed_coords)
+# print(stops)
+# print(match(needed_coords[2], stops))
+#rm(output)
+#write(match(needed_coords[2], stops), "exon_meta.txt")
+#needed_exon = exons[match(needed_coords[2], stops)
+
+
+
 print(pos)
 print(starts[pos])
 print(stops[pos])
-#rm(output)
-#write(match(needed_coords[2], stops), "exon_meta.txt")
 write(pos, "exon_meta.txt")
-#needed_exon = exons[match(needed_coords[2], stops)]
 needed_exon = exons[pos]
 print(needed_exon)
 write(needed_exon, "exon_seq.fa")
