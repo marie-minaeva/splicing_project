@@ -2,7 +2,7 @@ library(Peptides)
 library(stringr)
 
 setwd("~/splicing_project/")
-seq = readLines("best_aligned_protein.txt")
+seq = readLines("protein_seq.txt")
 if (seq == "NOT FOUND"){
         hyd = ''
         asn_n = ''
