@@ -4,8 +4,9 @@
 # pretraining biomaRt
 Rscript get_biomart_pretrained.R
 
-for i in {1..768}
+for i in {1..1000}
 	do
+	echo This is round $i
 	# Exon extraction
 	echo Exon extraction
 	Rscript get_needed_exons.R $i
@@ -49,6 +50,7 @@ for i in {1..768}
 
 
 	rm alignment_*
+	rm align_coords*
 	rm best*
 	rm compl*
 	rm exon*
@@ -58,3 +60,5 @@ for i in {1..768}
 	rm ref*
 	rm temp*
 	done
+
+python3.9 try_pymol.py
