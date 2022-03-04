@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-for i in {1..941}
+for i in {1..3790}
         do
 	Rscript get_seq.R $i
 	curl -L -H 'Expect:' -H 'Accept:text/xml' -F hmmdb=pfam -F seq='<temp.fa' https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan | grep alihmmdesc > domain.txt
