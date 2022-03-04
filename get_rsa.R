@@ -3,7 +3,7 @@ library(stringr)
 
 
 
-data = read.csv("Data/output_data_non_coloc_try.csv")
+data = read.csv("Data/output_non_sQTL_full.csv")
 names = data$ALPHAFOLD.NAME
 poss = data$ALIGN.COORDS
 poss
@@ -71,5 +71,5 @@ data$MEAN.ACC = mean_acc
 data$HELIX = hel
 data$SHEET = she
 data$TURN = turn
-View(data)
-write.csv(data, "Data/output_data_non_coloc_try.csv", row.names = F)
+#View(data)
+write.csv(data, "Data/output_non_sQTL_full.csv", row.names = F)

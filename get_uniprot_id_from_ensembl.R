@@ -79,3 +79,28 @@ if (identical(gene, character(0)) ){
         write(c(annotLookup[annotLookup$ensembl_gene_id == gene_name,]$external_gene_name[1],
                 annotLookup[annotLookup$ensembl_gene_id == gene_name,]$description[1], gene), "gene_metadata.txt")
 }
+
+#All top sQTLs
+
+# load('myEnvironment.RData')
+# args <- commandArgs(trailingOnly = TRUE)
+# j = as.numeric(args[1])
+# 
+# prots = readLines("prots_in_AlphaFold.txt")
+# data = read.table("Data/top_sQTLs_top_coloc.tsv", header=T, sep="\t")
+# gene_name = data$group[j]
+# uni_name = annotLookup[annotLookup$ensembl_gene_id == gene_name,]$uniprot_gn_id
+# gene = intersect(uni_name, prots)
+# 
+# 
+# write(GetSequences(gene)$Sequence, "ref_seq.txt")
+# print(gene)
+# if (identical(gene, character(0)) ){
+#         print("GEEEEEEENEEEEEEE1111111111")
+#         write(c(annotLookup[annotLookup$ensembl_gene_id == gene_name,]$external_gene_name[1],
+#                 annotLookup[annotLookup$ensembl_gene_id == gene_name,]$description[1], ""), "gene_metadata.txt")
+# }else{
+#         print("GEEEEEEENEEEEEEE")
+#         write(c(annotLookup[annotLookup$ensembl_gene_id == gene_name,]$external_gene_name[1],
+#                 annotLookup[annotLookup$ensembl_gene_id == gene_name,]$description[1], gene), "gene_metadata.txt")
+# }
