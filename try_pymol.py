@@ -6,7 +6,7 @@ import pymol
 import pandas as pd
 
 
-data = pd.read_csv("~/splicing_project/Data/output_data_non_sQTL_try.csv")
+data = pd.read_csv("~/splicing_project/Data/output_data_non_coloc_try.csv")
 
 #pymol.finish_launching()
 
@@ -26,8 +26,8 @@ for i in range(data.shape[0]):
         pymol.cmd.color("orange")
         pymol.cmd.color('green',"resi "+str(data["ALIGN COORDS"][i]))
         pymol.cmd.ray(1200, 1200)
-        pymol.cmd.png("~/splicing_project/Data/visuals/proteins/non_sQTL/"+ data["ALPHAFOLD NAME"][i]+".png")
-    except (pymol.CmdException, TypeError) as error:
+        pymol.cmd.png("~/splicing_project/Data/visuals/proteins/non_coloc/"+ data["ALPHAFOLD NAME"][i]+".png")
+    except pymol.CmdException:
         print("HERE")
         continue
 
