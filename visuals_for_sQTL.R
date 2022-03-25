@@ -101,7 +101,7 @@ dev.off()
 
 #View(data)
 
-
+# 
 # ggplot() + geom_density(data=data[data$LENGTH!=0,], aes(LENGTH, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[data2$LENGTH!=0,], aes(LENGTH, fill="non sQTL"), alpha = 0.2)
 # ggplot() + geom_density(data=data[!flag_outliers(data$HYDROPATHICITY),], aes(HYDROPATHICITY, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$HYDROPATHICITY),], aes(HYDROPATHICITY, fill="non sQTL"), alpha = 0.2)
 # ggplot() + geom_density(data=data[!flag_outliers(data$ASN../data$LENGTH *100),], aes(ASN../LENGTH *100, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$ASN../data2$LENGTH *100),], aes(ASN../LENGTH * 100, fill="non sQTL"), alpha = 0.2)
@@ -114,10 +114,10 @@ dev.off()
 # ggplot() + geom_density(data=data[!flag_outliers(data$LENGTH %% 3),], aes(LENGTH %% 3, fill="sQTL"), alpha=0.3) + geom_density(data=data2[!flag_outliers(data2$LENGTH %% 3),], aes(LENGTH %% 3, fill="non sQTL"), alpha=0.3)
 # 
 # 
-# ggplot() + geom_density(data=data[!flag_outliers(data$MIN),], aes(MIN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN),], aes(MIN, fill="non sQTL"), alpha = 0.2) 
+# ggplot() + geom_density(data=data[!flag_outliers(data$MIN),], aes(MIN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN),], aes(MIN, fill="non sQTL"), alpha = 0.2)
 # ggplot() + geom_density(data=data[!flag_outliers(data$Q1),], aes(Q1, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q1),], aes(Q1, fill="non sQTL"), alpha = 0.2)
 # ggplot() + geom_density(data=data[!flag_outliers(data$Q2),], aes(Q2, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q2),], aes(Q2, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q3),], aes(Q3, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3),], aes(Q3, fill="non sQTL"), alpha = 0.2) 
+# ggplot() + geom_density(data=data[!flag_outliers(data$Q3),], aes(Q3, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3),], aes(Q3, fill="non sQTL"), alpha = 0.2)
 # ggplot() + geom_density(data=data[!flag_outliers(data$MAX),], aes(MAX, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MAX),], aes(MAX, fill="non sQTL"), alpha = 0.2)
 # 
 # 
@@ -255,17 +255,17 @@ conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
-# #MIN TESTS
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$MIN,
-#               data2$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
+#MIN TESTS
+
+trait = c(trait, "MIN_RSA")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$MIN,
+              data2$MIN)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
 
 #Q1 TESTS
 
@@ -278,78 +278,78 @@ pval = c(pval, out[1])
 conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
-# 
-# 
-# #Q2 TESTS
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$Q2, 
-#               data2$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
+#
+#
+#Q2 TESTS
 
-# #Q3 TESTS
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$Q3, 
-#               data2$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# #MAX TESTS
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$MAX, 
-#               data2$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
+trait = c(trait, "Q2_RSA")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$Q2,
+              data2$Q2)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
 
-# #MIN_pLDDT TESTS
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$MIN_pLLDT, 
-#               data2$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# #Q1_pLDDT TESTS
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$Q1_pLLDT, 
-#               data2$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# #Q2_pLDDT TESTS
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$Q2_pLLDT, data2$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
+#Q3 TESTS
+
+trait = c(trait, "Q3_RSA")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$Q3,
+              data2$Q3)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
+
+#MAX TESTS
+
+trait = c(trait, "MAX_RSA")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$MAX,
+              data2$MAX)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
+
+#MIN_pLDDT TESTS
+
+trait = c(trait, "MIN_pLDDT")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$MIN_pLLDT,
+              data2$MIN_pLLDT)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
+
+#Q1_pLDDT TESTS
+
+trait = c(trait, "Q1_pLDDT")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$Q1_pLLDT,
+              data2$Q1_pLLDT)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
+
+#Q2_pLDDT TESTS
+
+trait = c(trait, "Q2_pLDDT")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$Q2_pLLDT, data2$Q2_pLLDT)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
 
 #Q3_pLDDT TESTS
 
@@ -361,17 +361,17 @@ pval = c(pval, out[1])
 conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
-# 
-# #MAX_pLDDT TESTS
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "sQTL vs non_sQTL")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data$MAX_pLLDT, data2$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
+
+#MAX_pLDDT TESTS
+
+trait = c(trait, "MAX_pLDDT")
+pair = c(pair, "sQTL vs non_sQTL")
+test_type = c(test_type, "ks")
+out = ks_stat(data$MAX_pLLDT, data2$MAX_pLLDT)
+pval = c(pval, out[1])
+conf_low = c(conf_low, out[3])
+conf_top = c(conf_top, out[4])
+stat = c(stat, out[2])
 
 # #UNSTRUC TESTS
 # unstruc = data.frame("sQTL" = c(nrow(data_unstruc), nrow(data) - nrow(data_unstruc)),
@@ -379,7 +379,7 @@ stat = c(stat, out[2])
 #                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
 #                      row.names = c("unstruc", "other"),
 #                      stringsAsFactors = FALSE)
-# 
+#
 # unstruc
 # test = fisher.test(unstruc)
 # pval = c(pval, test$p.value)
@@ -389,14 +389,14 @@ stat = c(stat, out[2])
 # conf_top = c(conf_top, test$conf.int[2])
 # stat = c(stat, test$estimate)
 # test_type = c(test_type, "fisher")
-# 
+#
 # # STRUC TESTS
 # struc = data.frame("sQTL" = c(nrow(data_struc), nrow(data)-nrow(data_struc)),
 #                    "non_sQTL" = c(nrow(data2_struc), nrow(data2)-nrow(data2_struc)),
 #                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
 #                    row.names = c("struc", "other"),
 #                    stringsAsFactors = FALSE)
-# 
+#
 # struc
 # test = fisher.test(struc)
 # pval = c(pval, test$p.value)
@@ -406,14 +406,14 @@ stat = c(stat, out[2])
 # conf_top = c(conf_top, test$conf.int[2])
 # stat = c(stat, test$estimate)
 # test_type = c(test_type, "fisher")
-# 
+#
 # # CONSERVED TESTS
 # cons = data.frame("sQTL" = c(nrow(data_cons), nrow(data) - nrow(data_cons)),
 #                   "non_sQTL" = c(nrow(data2_cons), nrow(data2) - nrow(data2_cons)),
 #                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
 #                   row.names = c("cons", "other"),
 #                   stringsAsFactors = FALSE)
-# 
+#
 # cons
 # test = fisher.test(cons)
 # pval = c(pval, test$p.value)
@@ -581,9 +581,9 @@ colnames(to_draw) = c("trait", "pval", "pair", "conf_low", "conf_top", "statisti
 to_draw = data.frame(to_draw)
 to_draw$pval = -as.numeric(to_draw$pval)
 #to_draw
-# line = replicate(length(pval), 1.5)
-ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + geom_col(position = position_dodge())  + geom_hline(yintercept = line) +  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + labs(fill='Pairs') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5)))
-# ggsave('statistical_summary_without_correction_sQTL_non_sQTL.png', path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+line = replicate(length(pval), 1.5)
+ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + geom_col(position = position_dodge())  + geom_hline(yintercept = line) +  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + labs(fill='Pairs') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + gtex_v8_figure_theme()
+ggsave('statistical_summary_without_correction_sQTL_non_sQTL.png', path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 to_draw$conf_low = as.numeric(to_draw$conf_low)
 to_draw$conf_top = as.numeric(to_draw$conf_top)
 #to_draw$conf_low = ifelse(to_draw$conf_low < 0, 0, to_draw$conf_low)

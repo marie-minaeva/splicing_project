@@ -1,6 +1,15 @@
 setwd("~/splicing_project/")
 data_full = read.csv("Data/combined_sQTL_data.csv")
-View(data_full)
+data_non_s = read.csv("Data/output_data_non_sQTL.csv")
+data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", sep='\t', header = T)
+
+ncol(data_full)
+ncol(data_non_s)
+rbind(data_full, data_non_s)
+colnames(data)
+nrow(data)
+nrow(data_non_s)
+data[!data$gene_symbol %in% data_non_s$GENE.NAME, ]$gene_symbol
 nrow(data_full)
 data_full = data_full[!is.na(data_full$anc_allele_freq), ]
 nrow(data_full)
@@ -29,6 +38,9 @@ library(mltools)
 library(foreach)
 library(doParallel)
 library(doSNOW)
+library(ggpubr)
+library(ggExtra)
+
 
 gtex_v8_figure_theme <- function() {
         return(theme(plot.title = element_text(face="plain",size=8), text = element_text(size=8),axis.text=element_text(size=7), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.text = element_text(size=7), legend.title = element_text(size=8)))
@@ -129,116 +141,208 @@ data4$GROUP = 4
 
 data_full = rbind(data1, data2, data3, data4)
 
+data_full$ASN.. = data_full$ASN../data_full$LENGTH *100
+
+data_full$CYS.. = data_full$CYS../data_full$LENGTH *100
+data_full$GROUP = as.factor(data_full$GROUP)
 
 
-View(data_full)
-
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(LENGTH, group=GROUP)) + coord_flip() + ggtitle("LENGTH")
-plot2 = ggplot(data = data_full, aes(LENGTH, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("LENGTH")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
-
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "LENGTH", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("LENGTH")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 600)  
+plot2 = ggdensity(data_full, x = "LENGTH",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("LENGTH")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 ggsave("descriptive_analysis_length_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(ASN../LENGTH *100, group=GROUP)) + coord_flip() + ggtitle("ASN../LENGTH *100")
-plot2 = ggplot(data = data_full, aes(ASN../LENGTH *100, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("ASN../LENGTH *100")
-
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "ASN..", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("ASN../LENGTH *100")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 50)
+plot2 = ggdensity(data_full, x = "ASN..",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("ASN..")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_ASN_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(CYS../LENGTH *100, group=GROUP)) + coord_flip() + ggtitle("CYS../LENGTH *100")
-plot2 = ggplot(data = data_full, aes(CYS../LENGTH *100, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("CYS../LENGTH *100")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "CYS..", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("CYS../LENGTH *100")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 50)
+plot2 = ggdensity(data_full, x = "CYS..",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("CYS..")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_CYS_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(MIN, group=GROUP)) + coord_flip() + ggtitle("MIN")
-plot2 = ggplot(data = data_full, aes(MIN, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("MIN")
-
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MIN", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MIN")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 170)
+plot2 = ggdensity(data_full, x = "MIN",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MIN")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_MIN_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q1, group=GROUP)) + coord_flip() + ggtitle("Q1")
-plot2 = ggplot(data = data_full, aes(Q1, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q1")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q1", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q1")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 175)
+plot2 = ggdensity(data_full, x = "Q1",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q1")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q1_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q2, group=GROUP)) + coord_flip() + ggtitle("Q2")
-plot2 = ggplot(data = data_full, aes(Q2, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q2")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q2", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q2")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 170)
+plot2 = ggdensity(data_full, x = "Q2",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q2")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q2_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q3, group=GROUP)) + coord_flip() + ggtitle("Q3")
-plot2 = ggplot(data = data_full, aes(Q3, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q3")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q3", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q3")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 150)
+plot2 = ggdensity(data_full, x = "Q3",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q3")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q3_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(MAX, group=GROUP)) + coord_flip() + ggtitle("MAX")
-plot2 = ggplot(data = data_full, aes(MAX, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("MAX")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MAX", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MAX")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 220)
+plot2 = ggdensity(data_full, x = "MAX",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MAX")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_MAX_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(MIN_pLLDT, group=GROUP)) + coord_flip() + ggtitle("MIN_pLLDT")
-plot2 = ggplot(data = data_full, aes(MIN_pLLDT, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("MIN_pLLDT")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MIN_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MIN_pLDDT")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 190)
+plot2 = ggdensity(data_full, x = "MIN_pLLDT",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MIN_pLDDT")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_MIN_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q1_pLLDT, group=GROUP)) + coord_flip() + ggtitle("Q1_pLLDT")
-plot2 = ggplot(data = data_full, aes(Q1_pLLDT, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q1_pLLDT")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q1_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q1_pLDDT")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 190)
+plot2 = ggdensity(data_full, x = "Q1_pLLDT",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q1_pLDDT")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q1_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q2_pLLDT, group=GROUP)) + coord_flip() + ggtitle("Q2_pLLDT")
-plot2 = ggplot(data = data_full, aes(Q2_pLLDT, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q2_pLLDT")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q2_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q2_pLDDT")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 170)
+plot2 = ggdensity(data_full, x = "Q2_pLLDT",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q2_pLDDT")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q2_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(Q3_pLLDT, group=GROUP)) + coord_flip() + ggtitle("Q3_pLLDT")
-plot2 = ggplot(data = data_full, aes(Q3_pLLDT, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("Q3_pLLDT")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q3_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q3_pLDDT")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 170)
+plot2 = ggdensity(data_full, x = "Q3_pLLDT",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q3_pLDDT")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
 
 ggsave("descriptive_analysis_Q3_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
-plot1 = ggplot() + gtex_v8_figure_theme() + geom_boxplot(data=data_full, aes(MAX_pLLDT, group=GROUP)) + coord_flip() + ggtitle("MAX_pLLDT")
-plot2 = ggplot(data = data_full, aes(MAX_pLLDT, color=as.factor(GROUP))) + gtex_v8_figure_theme() + geom_density(alpha = 0.2) + ggtitle("MAX_pLLDT")
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
+plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MAX_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MAX_pLDDT")
+my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+        stat_compare_means(label.y = 150)
+plot2 = ggdensity(data_full, x = "MAX_pLLDT",
+                  add = "mean", rug = TRUE,
+                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MAX_pLDDT")
+plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+                   layout_matrix = rbind(c(1, 2, 3)))
+
+#ggMarginal(plot1, type="histogram")
 
 ggsave("descriptive_analysis_MAX_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
@@ -255,7 +359,14 @@ data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
 data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
 data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
 
-ggplot(data_full_2, aes(x = HELIX, y=perc, fill=as.factor(GROUP))) + geom_bar(stat="identity", position=position_dodge()) + gtex_v8_figure_theme() + ggtitle("HELIX")
+plot1 = gghistogram(data_full_2, x = "HELIX", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
+        #geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
+
+plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
+                   layout_matrix = rbind(c(1, 2)))
+
 ggsave("descriptive_analysis_HELIX_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 data_full %>% 
@@ -272,7 +383,13 @@ data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
 data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
 data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
 
-ggplot(data_full_2, aes(x = SHEET, y = perc, fill=as.factor(GROUP))) + geom_bar(stat = "identity", position=position_dodge()) + gtex_v8_figure_theme() + ggtitle("SHEET")
+plot1 = gghistogram(data_full_2, x = "SHEET", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
+#geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
+
+plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
+                   layout_matrix = rbind(c(1, 2)))
 ggsave("descriptive_analysis_SHEET_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 data_full %>% 
@@ -290,7 +407,13 @@ data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
 data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
 data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
 
-ggplot(data_full_2, aes(x = TURN, y = perc, fill=as.factor(GROUP))) + geom_bar(stat = "identity", position=position_dodge()) + gtex_v8_figure_theme() + ggtitle("TURN")
+plot1 = gghistogram(data_full_2, x = "TURN", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
+#geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
+
+plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
+                   layout_matrix = rbind(c(1, 2)))
 ggsave("descriptive_analysis_TURN_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
@@ -373,50 +496,50 @@ nrow(data4_loop)
 # View(data2_loop)
 # View(data3_loop)
 #write.csv(data_loop, "Data/output_data_sQTL_loop_cut.csv", row.names = F)
-
-dev.off()
-to_draw = data.frame()
-
-pa = replicate(round(nrow(data1_unstruc) / nrow(data1) * 100), "1")
-pa = c(pa, replicate(round(nrow(data2_unstruc) / nrow(data2) * 100), "2"))
-pa = c(pa, replicate(round(nrow(data3_unstruc) / nrow(data3) * 100), "3"))
-pa = c(pa, replicate(round(nrow(data4_unstruc) / nrow(data4) * 100), "4"))
-length(pa)
-pa = c(pa, replicate(round(nrow(data1_struc) / nrow(data1) * 100), "1"))
-pa = c(pa, replicate(round(nrow(data2_struc) / nrow(data2) * 100), "2"))
-pa = c(pa, replicate(round(nrow(data3_struc) / nrow(data3) * 100), "3"))
-pa = c(pa, replicate(round(nrow(data4_struc) / nrow(data4) * 100), "4"))
-
-pa = c(pa, replicate(round(nrow(data1_cons) / nrow(data1) * 100), "1"))
-pa = c(pa, replicate(round(nrow(data2_cons) / nrow(data2) * 100), "2"))
-pa = c(pa, replicate(round(nrow(data3_cons) / nrow(data3) * 100), "3"))
-pa = c(pa, replicate(round(nrow(data4_cons) / nrow(data4) * 100), "4"))
-
-pa = c(pa, replicate(round(nrow(data1_loop) / nrow(data1) * 100), "1"))
-pa = c(pa, replicate(round(nrow(data2_loop) / nrow(data2) * 100), "2"))
-pa = c(pa, replicate(round(nrow(data3_loop) / nrow(data3) * 100), "3"))
-pa = c(pa, replicate(round(nrow(data4_loop) / nrow(data4) * 100), "4"))
-
-trait = replicate(round(nrow(data1_unstruc) / nrow(data1)*100) + round(nrow(data2_unstruc) / nrow(data2)*100) + round(nrow(data3_unstruc) / nrow(data3)*100) + round(nrow(data4_unstruc) / nrow(data4)*100), "Unstructured")
-trait = c(trait, replicate(round(nrow(data1_struc) / nrow(data1)*100) + round(nrow(data2_struc) / nrow(data2)*100) + round(nrow(data3_struc) / nrow(data3)*100) + round(nrow(data4_struc) / nrow(data4)*100), "Structured"))
-trait = c(trait, replicate(round(nrow(data1_cons) / nrow(data1)*100) + round(nrow(data2_cons) / nrow(data2)*100) + round(nrow(data3_cons) / nrow(data3)*100) + round(nrow(data4_cons) / nrow(data4)*100), "Conserved"))
-trait = c(trait, replicate(round(nrow(data1_loop) / nrow(data1)*100) + round(nrow(data2_loop) / nrow(data2)*100) + round(nrow(data3_loop) / nrow(data3)*100) + round(nrow(data4_loop) / nrow(data4)*100), "Loop"))
-
-print(length(pa))
-print(length(trait))
-to_draw = cbind(trait, pa)
-to_draw
-colnames(to_draw) = c("trait", "pair")
-to_draw = data.frame(to_draw)
-to_draw
-ggplot(to_draw, aes(fill = as.factor(pa), x=trait)) + gtex_v8_figure_theme() + geom_bar(position = position_dodge())  +theme(axis.text.x = element_text( vjust = 0.5, hjust=1, size = 10), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8))  + labs(fill='Group') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + ylab("proportion")
-ggsave("structure_bars_among_groups.png", height = 3.11, width = 7.92,path = "Data/visuals/", device='png', dpi=700)
-to_draw
-table(to_draw)[1, ]
-chisq.test(table(to_draw)[1, ])
-chisq.test(table(to_draw)[2, ])
-chisq.test(table(to_draw)[3, ])
-chisq.test(table(to_draw)[4, ])
+# 
+# dev.off()
+# to_draw = data.frame()
+# 
+# pa = replicate(round(nrow(data1_unstruc) / nrow(data1) * 100), "1")
+# pa = c(pa, replicate(round(nrow(data2_unstruc) / nrow(data2) * 100), "2"))
+# pa = c(pa, replicate(round(nrow(data3_unstruc) / nrow(data3) * 100), "3"))
+# pa = c(pa, replicate(round(nrow(data4_unstruc) / nrow(data4) * 100), "4"))
+# length(pa)
+# pa = c(pa, replicate(round(nrow(data1_struc) / nrow(data1) * 100), "1"))
+# pa = c(pa, replicate(round(nrow(data2_struc) / nrow(data2) * 100), "2"))
+# pa = c(pa, replicate(round(nrow(data3_struc) / nrow(data3) * 100), "3"))
+# pa = c(pa, replicate(round(nrow(data4_struc) / nrow(data4) * 100), "4"))
+# 
+# pa = c(pa, replicate(round(nrow(data1_cons) / nrow(data1) * 100), "1"))
+# pa = c(pa, replicate(round(nrow(data2_cons) / nrow(data2) * 100), "2"))
+# pa = c(pa, replicate(round(nrow(data3_cons) / nrow(data3) * 100), "3"))
+# pa = c(pa, replicate(round(nrow(data4_cons) / nrow(data4) * 100), "4"))
+# 
+# pa = c(pa, replicate(round(nrow(data1_loop) / nrow(data1) * 100), "1"))
+# pa = c(pa, replicate(round(nrow(data2_loop) / nrow(data2) * 100), "2"))
+# pa = c(pa, replicate(round(nrow(data3_loop) / nrow(data3) * 100), "3"))
+# pa = c(pa, replicate(round(nrow(data4_loop) / nrow(data4) * 100), "4"))
+# 
+# trait = replicate(round(nrow(data1_unstruc) / nrow(data1)*100) + round(nrow(data2_unstruc) / nrow(data2)*100) + round(nrow(data3_unstruc) / nrow(data3)*100) + round(nrow(data4_unstruc) / nrow(data4)*100), "Unstructured")
+# trait = c(trait, replicate(round(nrow(data1_struc) / nrow(data1)*100) + round(nrow(data2_struc) / nrow(data2)*100) + round(nrow(data3_struc) / nrow(data3)*100) + round(nrow(data4_struc) / nrow(data4)*100), "Structured"))
+# trait = c(trait, replicate(round(nrow(data1_cons) / nrow(data1)*100) + round(nrow(data2_cons) / nrow(data2)*100) + round(nrow(data3_cons) / nrow(data3)*100) + round(nrow(data4_cons) / nrow(data4)*100), "Conserved"))
+# trait = c(trait, replicate(round(nrow(data1_loop) / nrow(data1)*100) + round(nrow(data2_loop) / nrow(data2)*100) + round(nrow(data3_loop) / nrow(data3)*100) + round(nrow(data4_loop) / nrow(data4)*100), "Loop"))
+# 
+# print(length(pa))
+# print(length(trait))
+# to_draw = cbind(trait, pa)
+# to_draw
+# colnames(to_draw) = c("trait", "pair")
+# to_draw = data.frame(to_draw)
+# to_draw
+# ggplot(to_draw, aes(fill = as.factor(pa), x=trait)) + gtex_v8_figure_theme() + geom_bar(position = position_dodge())  +theme(axis.text.x = element_text( vjust = 0.5, hjust=1, size = 10), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8))  + labs(fill='Group') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + ylab("proportion")
+# ggsave("structure_bars_among_groups.png", height = 3.11, width = 7.92,path = "Data/visuals/", device='png', dpi=700)
+# to_draw
+# table(to_draw)[1, ]
+# chisq.test(table(to_draw)[1, ])
+# chisq.test(table(to_draw)[2, ])
+# chisq.test(table(to_draw)[3, ])
+# chisq.test(table(to_draw)[4, ])
 pval = c()
 pair = c()
 trait = c()
@@ -2366,13 +2489,25 @@ to_draw$alpha = ifelse((to_draw$test_type == "ks"  & ((to_draw$conf_low <= 0 & t
 
 
 line = replicate(length(pval), 1.5)
-ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + 
-        geom_col(position = position_dodge())  + geom_hline(yintercept = line) + 
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), 
-              legend.text = element_text(size=7), axis.title.y = element_text(size = 8), 
-              axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + 
-        labs(fill='Pairs') + 
-        guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + gtex_v8_figure_theme()
+
+
+
+gghistogram(to_draw, x = "trait", y="pval", rug = F, color = "pair", fill = "pair", stat="identity", position = "dodge")  + 
+        geom_hline(yintercept = line, linetype = "dashed") +
+        theme(axis.text.x = element_text(angle = 90))
+
+
+ggsave("statistical_summary_all_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+
+
+
+# ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + 
+#         geom_col(position = position_dodge())  + geom_hline(yintercept = line) + 
+#         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), 
+#               legend.text = element_text(size=7), axis.title.y = element_text(size = 8), 
+#               axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + 
+#         labs(fill='Pairs') + 
+#         guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + gtex_v8_figure_theme()
 
 line1 = replicate(length(pval), 0.0)
 
@@ -2391,11 +2526,11 @@ ggplot(to_draw[to_draw$pair == "1 vs 4" & to_draw$test_type == "fisher", ], aes(
 ggsave("statistical_summary_fisher_groups_1_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "2 vs 3" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 3                                                                Enrichment in group 2\n log(odd_ratio)")+coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
+        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 3                                                                                                        Enrichment in group 2\n log(odd_ratio)")+coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
 ggsave("statistical_summary_fisher_groups_2_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "2 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + ylab("Enrichment in group 4                                                                Enrichment in group 2\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 4") + gtex_v8_figure_theme()
+        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + ylab("Enrichment in group 4                                                                                                   Enrichment in group 2\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 4") + gtex_v8_figure_theme()
 ggsave("statistical_summary_fisher_groups_2_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
@@ -2418,7 +2553,7 @@ ggplot(to_draw[to_draw$pair == "1 vs 4" & to_draw$test_type == "ks", ], aes(x = 
 ggsave("statistical_summary_ks_groups_1_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "2 vs 3" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 3                                                                 Enrichment in group 2\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
+        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 3                                                                                                    Enrichment in group 2\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
 ggsave("statistical_summary_ks_groups_2_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "2 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
@@ -2426,7 +2561,7 @@ ggplot(to_draw[to_draw$pair == "2 vs 4" & to_draw$test_type == "ks", ], aes(x = 
 ggsave("statistical_summary_ks_groups_2_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
         geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                                                                 Enrichment in group 3\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("3 vs 4") + gtex_v8_figure_theme()
+        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                                                                                                                     Enrichment in group 3\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("3 vs 4") + gtex_v8_figure_theme()
 ggsave("statistical_summary_ks_groups_3_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 #ggsave("statistical_summary_with_correction_sQTL_among_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
@@ -2461,39 +2596,38 @@ box1 = cbind(data1$anc_psi, "AA")
 box1 = rbind(box1, cbind(data1$mean_01_psi, "AD"))
 box1 = rbind(box1, cbind(data1$der_psi, "DD"))
 box1 = data.frame(box1)
+box1$X1 = as.numeric(box1$X1)
 
 box2 = cbind(data2$anc_psi, "AA")
 box2 = rbind(box2, cbind(data2$mean_01_psi, "AD"))
 box2 = rbind(box2, cbind(data2$der_psi, "DD"))
 box2 = data.frame(box2)
+box2$X1 = as.numeric(box2$X1)
 
 box3 = cbind(data3$anc_psi, "AA")
 box3 = rbind(box3, cbind(data3$mean_01_psi, "AD"))
 box3 = rbind(box3, cbind(data3$der_psi, "DD"))
 box3 = data.frame(box3)
+box3$X1 = as.numeric(box3$X1)
 
 box4 = cbind(data4$anc_psi, "AA")
 box4 = rbind(box4, cbind(data4$mean_01_psi, "AD"))
 box4 = rbind(box4, cbind(data4$der_psi, "DD"))
 box4 = data.frame(box4)
-dev.off()
-plot1 = ggplot(box1, aes(x=as.numeric(X1), group=as.factor(X2))) +
-        geom_boxplot(fill="2")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme() + coord_flip() + scale_x_discrete(breaks=c("-0.2","0.0","0.2"),
-                                                                                                                                                                               labels=c("AA", "AD", "DD"))
+box4$X1 = as.numeric(box4$X1)
 
-plot2 = ggplot(box2, aes(x=as.numeric(X1), group=as.factor(X2)), fill='green') +
-        geom_boxplot(fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + coord_flip()
+dev.off()
+plot1 = ggboxplot(box1, x="X2", y = "X1", fill="2") +  xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme() 
+plot1
+plot2 = ggboxplot(box1, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() 
 
 plot3 = ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
         geom_point(size = 4) +
         geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 2                   Enrichment in group 1\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
 
-plot4 = ggplot(box3, aes(x=as.numeric(X1), group=as.factor(X2)), fill='blue') +
-        geom_boxplot(fill="4")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme() + coord_flip() + scale_x_discrete(breaks=c("-0.2","0.0","0.2"),
-                                                                                                                                                                              labels=c("AA", "AD", "DD"))
+plot4 = ggboxplot(box1, x="X2", y = "X1", fill="4")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme() 
 
-plot5 = ggplot(box4, aes(x=as.numeric(X1), group=as.factor(X2)), fill='violet') +
-        geom_boxplot(fill="5")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme() + coord_flip()
+plot5 = ggboxplot(box1, x="X2", y = "X1", fill="5")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme()
 
 
 plot6 = ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
@@ -2511,22 +2645,16 @@ dev.off()
 
 
 
-plot1 = ggplot(box1, aes(x=as.numeric(X1), group=as.factor(X2))) +
-        geom_boxplot(fill="2") + xlab("PSI") + ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme() + coord_flip()
+plot1 = ggboxplot(box1, x="X2", y = "X1", fill="2")+ xlab("PSI") + ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme()
 
-plot2 = ggplot(box2, aes(x=as.numeric(X1), group=as.factor(X2)), fill='green') +
-        geom_boxplot(fill="3") + xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + coord_flip()
+plot2 = ggboxplot(box1, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme()
 
 plot3 = ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
         geom_point(size = 4) +
         geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 2                   Enrichment in group 1\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
 
-plot4 = ggplot(box3, aes(x=as.numeric(X1), group=as.factor(X2)), fill='blue') +
-        geom_boxplot(fill="4")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme() + coord_flip() + scale_x_discrete(breaks=c("-0.2","0.0","0.2"),
-                                                                                                                                                                              labels=c("AA", "AD", "DD"))
-
-plot5 = ggplot(box4, aes(x=as.numeric(X1), group=as.factor(X2)), fill='violet') +
-        geom_boxplot(fill="5")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme() + coord_flip()
+plot4 = ggboxplot(box1, x="X2", y = "X1", fill="4") + xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme()
+plot5 = ggboxplot(box1, x="X2", y = "X1", fill="5") +  xlab("PSI") + ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme()
 
 
 plot6 = ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
@@ -2542,11 +2670,6 @@ View(to_draw)
 
 
 
-
-library(diptest)
-hist(data1$LENGTH)
-dip.test(data1$LENGTH)
-dip.test(data1$MIN_pLLDT)
 # 
 # 
 # pre_data_1 = data1

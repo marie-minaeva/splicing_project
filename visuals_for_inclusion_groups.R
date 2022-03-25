@@ -1,13 +1,18 @@
 setwd("~/splicing_project/")
 ###___________________________________________________CHANGED______________________________________________________
 data_full = read.csv("Data/combined_sQTL_data.csv")
-View(data_full)
-nrow(data_full)
+data_full_1 = read.csv("Data/output_non_sQTL_full.csv")
+data_full_1 %>% select(intersect(colnames(data_full), colnames(data_full_1))) -> data_full_1
+View(data_full_1)
+ncol(data_full)
+ncol(data_full_1)
 data_full = data_full[!is.na(data_full$anc_allele_freq), ]
-
+data_full %>% select(intersect(colnames(data_full), colnames(data_full_1))) -> data_full
+data_full = rbind(data_full, data_full_1)
 data2 = data_full[data_full$mean_01_psi < 0.5, ]
-nrow(data)
+
 data = data_full[data_full$mean_01_psi > 0.5, ]
+nrow(data)
 nrow(data2)
 
 

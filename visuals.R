@@ -9,6 +9,7 @@ library(mltools)
 library(foreach)
 library(doParallel)
 library(doSNOW)
+library(ggpubr)
 gtex_v8_figure_theme <- function() {
   return(theme(plot.title = element_text(face="plain",size=8), text = element_text(size=8),axis.text=element_text(size=7), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.text = element_text(size=7), legend.title = element_text(size=8)))
 }
@@ -676,9 +677,14 @@ c_t_f = c()
   to_draw = data.frame(to_draw)
   to_draw$pval = -as.numeric(to_draw$pval)
   to_draw
+  
+  
+  
   line = replicate(length(pval), 1.5)
-  ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + geom_col(position = position_dodge())  + geom_hline(yintercept = line) +  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + labs(fill='Pairs') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5)))
-  file = paste(c("statistical_summary_without_correction_cross_val_", as.character(i),".png"), collapse="")
+  gghistogram(to_draw, x = "trait", y="pval", rug = F, color = "pair", fill = "pair", stat="identity", position = "dodge")  + 
+    geom_hline(yintercept = line, linetype = "dashed") +
+    theme(axis.text.x = element_text(angle = 90))
+  file = paste(c("statistical_summary_with_correction.png"), collapse="")
   ggsave(file, path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
   
   to_draw$trait = factor(to_draw$trait, levels = unique(trait))
