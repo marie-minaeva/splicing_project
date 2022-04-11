@@ -1,4 +1,5 @@
 setwd("~/splicing_project/")
+set.seed(872436)           # Set seed
 ###___________________________________________________CHANGED______________________________________________________
 data_full = read.csv("Data/combined_sQTL_data.csv")
 data_full_1 = read.csv("Data/output_non_sQTL_full.csv")
@@ -9,17 +10,25 @@ ncol(data_full_1)
 data_full = data_full[!is.na(data_full$anc_allele_freq), ]
 data_full %>% select(intersect(colnames(data_full), colnames(data_full_1))) -> data_full
 # data_full = rbind(data_full, data_full_1)
+
 data2 = data_full[data_full$mean_01_psi < 0.5, ]
 
 data = data_full[data_full$mean_01_psi > 0.5, ]
 nrow(data)
 nrow(data2)
+data = data[sample(1:nrow(data), nrow(data2)),]
+nrow(data)
+data_full = rbind(data, data2)
+data_full$mean_01_psi = data_full[sample(1:nrow(data_full)),]$mean_01_psi
+# data_full = rbind(data_full, data_full_1)
 
+data2 = data_full[data_full$mean_01_psi < 0.5, ]
 
+data = data_full[data_full$mean_01_psi > 0.5, ]
+nrow(data)
+nrow(data2)
 View(data)
 
-data = unique.data.frame(data)
-data2 = unique.data.frame(data2)
 # View(data)
 nrow(data)
 nrow(data2)
@@ -652,7 +661,7 @@ ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + geom_col(positi
         labs(fill='Pairs') + guides(shape = guide_legend(override.aes = list(size = 0.5)), 
                                     color = guide_legend(override.aes = list(size = 0.5))) +
         gtex_v8_figure_theme()
-ggsave("statistical_summary_without_correction_inclusion_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+ggsave("statistical_summary_without_correction_inclusion_groups_random_shuffle.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 to_draw$conf_low = as.numeric(to_draw$conf_low)
 to_draw$conf_top = as.numeric(to_draw$conf_top)
@@ -674,7 +683,7 @@ ggplot(to_draw[to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numer
         coord_flip() + geom_hline(yintercept = line1, color="red") + 
         theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"),ends = "both")),
               axis.title.x = element_text(angle = 0)) + gtex_v8_figure_theme() + guides(alpha = FALSE)
-ggsave("statistical_summary_fisher_inclusion_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+ggsave("statistical_summary_fisher_inclusion_groups_random_shuffle.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 line1 = replicate(length(pval), 0.0)
 #col = c('3', '4', '5', '6', 'light blue', 'orange', 'orange', 'orange', 'orange', 'orange', '2', '2', '2', '2', '2')
@@ -686,11 +695,11 @@ ggplot(to_draw[to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(stati
         theme(axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"),ends = "both")),
               axis.title.x = element_text(angle = 0)) + gtex_v8_figure_theme() + guides(alpha = FALSE)
 #ggsave("statistical_summary_with_correction_der_all.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggsave("statistical_summary_ks_inclusion_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+ggsave("statistical_summary_ks_inclusion_groups_random_shuffle.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 
 
-write.csv(to_draw, "Data/to_draw_inclusion_groups.csv", quote=F, row.names = F)
+write.csv(to_draw, "Data/to_draw_inclusion_groups_random_shuffle.csv", quote=F, row.names = F)
 
 
 

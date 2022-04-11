@@ -79,7 +79,7 @@ ks_stat = function(x, y){
 
 
 
-data = read.csv("Data/output_top_sQTL.csv")
+data = read.csv("Data/combined_sQTL_data.csv")
 data2 = read.csv("Data/output_non_sQTL_full.csv")
 
 ncol(data)
@@ -114,25 +114,25 @@ dev.off()
 # ggplot() + geom_density(data=data[!flag_outliers(data$LENGTH %% 3),], aes(LENGTH %% 3, fill="sQTL"), alpha=0.3) + geom_density(data=data2[!flag_outliers(data2$LENGTH %% 3),], aes(LENGTH %% 3, fill="non sQTL"), alpha=0.3)
 # 
 # 
-# ggplot() + geom_density(data=data[!flag_outliers(data$MIN),], aes(MIN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN),], aes(MIN, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q1),], aes(Q1, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q1),], aes(Q1, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q2),], aes(Q2, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q2),], aes(Q2, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q3),], aes(Q3, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3),], aes(Q3, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$MAX),], aes(MAX, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MAX),], aes(MAX, fill="non sQTL"), alpha = 0.2)
-# 
-# 
-# ggplot() + geom_density(data=data[!flag_outliers(data$MIN_pLLDT),], aes(MIN_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN_pLLDT),], aes(MIN_pLLDT, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q1_pLLDT),], aes(Q1_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q1_pLLDT),], aes(Q1_pLLDT, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q2_pLLDT),], aes(Q2_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q2_pLLDT),], aes(Q2_pLLDT, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$Q3_pLLDT),], aes(Q3_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3_pLLDT),], aes(Q3_pLLDT, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data[!flag_outliers(data$MAX_pLLDT),], aes(MAX_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MAX_pLLDT),], aes(MAX_pLLDT, fill="non sQTL"), alpha = 0.2)
-# 
-# 
-# 
-# 
-# ggplot() + geom_density(data=data, aes(HELIX, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(HELIX, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data, aes(SHEET, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(SHEET, fill="non sQTL"), alpha = 0.2)
-# ggplot() + geom_density(data=data, aes(TURN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(TURN, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$MIN),], aes(MIN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN),], aes(MIN, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q1),], aes(Q1, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q1),], aes(Q1, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q2),], aes(Q2, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q2),], aes(Q2, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q3),], aes(Q3, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3),], aes(Q3, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$MAX),], aes(MAX, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MAX),], aes(MAX, fill="non sQTL"), alpha = 0.2)
+
+
+ggplot() + geom_density(data=data[!flag_outliers(data$MIN_pLLDT),], aes(MIN_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MIN_pLLDT),], aes(MIN_pLLDT, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q1_pLLDT),], aes(Q1_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q1_pLLDT),], aes(Q1_pLLDT, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q2_pLLDT),], aes(Q2_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q2_pLLDT),], aes(Q2_pLLDT, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$Q3_pLLDT),], aes(Q3_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$Q3_pLLDT),], aes(Q3_pLLDT, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[!flag_outliers(data$MAX_pLLDT),], aes(MAX_pLLDT, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[!flag_outliers(data2$MAX_pLLDT),], aes(MAX_pLLDT, fill="non sQTL"), alpha = 0.2)
+
+
+
+
+ggplot() + geom_density(data=data, aes(HELIX, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(HELIX, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data, aes(SHEET, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(SHEET, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data, aes(TURN, fill="sQTL"), alpha = 0.2) + geom_density(data=data2, aes(TURN, fill="non sQTL"), alpha = 0.2)
 
 data_unstruc = data[data$Q2 > 40.0 & data$Q2_pLLDT < 50.0, ]
 data_unstruc = data_unstruc[!is.na(data_unstruc$GENE.NAME),] 
@@ -207,7 +207,6 @@ test_type = c()
 # stat = c(stat, out[2])
 
 #LENGTH TESTS
-pval = c(pval, test$p.value)
 trait = c(trait, "Length")
 pair = c(pair, "sQTL vs non_sQTL")
 test_type = c(test_type, "ks")
@@ -594,7 +593,7 @@ line1 = replicate(length(pval), 0.0)
 to_draw$alpha = ifelse((to_draw$test_type == "ks"  & ((to_draw$conf_low <= 0 & to_draw$conf_top >= 0) | 
                                                         (to_draw$conf_low >= 0 & to_draw$conf_top <= 0))) | 
                          (to_draw$test_type == "fisher"  & ((log(to_draw$conf_low) <= 0 & log(to_draw$conf_top) >= 0) | 
-                                                              (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.2, 1.0)
+                                                              (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.4, 1.0)
 
 
 ggplot(to_draw[to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
@@ -617,7 +616,7 @@ ggsave('statistical_summary_ks_sQTL_non_sQTL.png', path = "Data/visuals/", heigh
 
 View(to_draw)
 
-ggplot() + geom_density(data=data[data$DIP_P <= 0.05, ], aes(DIP, fill="sQTL"), alpha = 0.2) + geom_density(data=data2[data2$DIP_P <= 0.05, ], aes(DIP, fill="non sQTL"), alpha = 0.2)
+ggplot() + geom_density(data=data[data$DIP_P <= 0.05, ], aes(DIP, fill="sQTL"), alpha = 0.4) + geom_density(data=data2[data2$DIP_P <= 0.05, ], aes(DIP, fill="non sQTL"), alpha = 0.4)
 ggplot() + geom_density(data=data[data$DIP_P <= 0.05, ], aes(-log10(DIP_P), fill="sQTL"), alpha = 0.2) + geom_density(data=data2[data2$DIP_P <= 0.05, ], aes(-log10(DIP_P), fill="non sQTL"), alpha = 0.2)
 min(data2$DIP_P, na.rm=T)
 View(data[data$DIP_P <= 0.001 & !is.na(data$DIP_P), ])

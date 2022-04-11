@@ -117,8 +117,8 @@ ks_stat = function(x, y){
 }
 
 
-data = data[!flag_outliers(data$LENGTH) & data$LENGTH >= 15,]
-data2 = data2[!flag_outliers(data2$LENGTH) & data2$LENGTH >= 15,]
+# data = data[!flag_outliers(data$LENGTH) & data$LENGTH >= 15,]
+# data2 = data2[!flag_outliers(data2$LENGTH) & data2$LENGTH >= 15,]
 
 data1$GROUP = "Increasing"
 data2$GROUP = "Decreasing"
@@ -419,7 +419,7 @@ to_draw$conf_top = as.numeric(to_draw$conf_top)
 to_draw$alpha = ifelse((to_draw$test_type == "ks"  & ((to_draw$conf_low <= 0 & to_draw$conf_top >= 0) | 
                                                               (to_draw$conf_low >= 0 & to_draw$conf_top <= 0))) | 
                                (to_draw$test_type == "fisher"  & ((log(to_draw$conf_low) <= 0 & log(to_draw$conf_top) >= 0) | 
-                                                                          (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.8, 1.0)
+                                                                          (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.4, 1.0)
 
 
 
