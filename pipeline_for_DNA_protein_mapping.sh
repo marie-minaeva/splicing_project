@@ -4,7 +4,7 @@
 # pretraining biomaRt
 Rscript get_biomart_pretrained.R
 
-for i in {1..3790}
+for i in {1..1}
 	do
 	echo This is round $i
 	# Exon extraction

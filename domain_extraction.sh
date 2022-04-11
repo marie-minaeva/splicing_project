@@ -8,5 +8,4 @@ for i in {1..3790}
 	Rscript get_domain.R $i
 	rm temp.fa
 	rm domain.txt
-	#cat domain.txt
 	done
