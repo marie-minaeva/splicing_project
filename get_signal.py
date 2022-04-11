@@ -8,7 +8,7 @@ from collections import defaultdict
 
 
 
-data = pd.read_csv("~/splicing_project/Data/output_data_coloc.csv")
+data = pd.read_csv("~/splicing_project/Data/output_data_non_coloc.csv")
 data["DOMAIN"] = None
 data["SIGNAL"] = None
 data["TOPOLOGY"] = None
@@ -83,7 +83,7 @@ for ind, acc in enumerate(data["ALPHAFOLD.NAME"]):
 
 
 print(data)
-data.to_csv("~/splicing_project/Data/output_data_coloc.csv", index=False)
+data.to_csv("~/splicing_project/Data/output_data_non_coloc.csv", index=False)
 """
 for ind, acc in enumerate(data["ALPHAFOLD.NAME"]):
     print(acc)
