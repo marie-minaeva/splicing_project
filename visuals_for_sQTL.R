@@ -255,17 +255,17 @@ conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
-#MIN TESTS
-
-trait = c(trait, "MIN_RSA")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$MIN,
-              data2$MIN)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
+# #MIN TESTS
+# 
+# trait = c(trait, "MIN_RSA")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$MIN,
+#               data2$MIN)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
 
 #Q1 TESTS
 
@@ -280,76 +280,76 @@ conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 #
 #
-#Q2 TESTS
-
-trait = c(trait, "Q2_RSA")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$Q2,
-              data2$Q2)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-#Q3 TESTS
-
-trait = c(trait, "Q3_RSA")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$Q3,
-              data2$Q3)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-#MAX TESTS
-
-trait = c(trait, "MAX_RSA")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$MAX,
-              data2$MAX)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-#MIN_pLDDT TESTS
-
-trait = c(trait, "MIN_pLDDT")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$MIN_pLLDT,
-              data2$MIN_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-#Q1_pLDDT TESTS
-
-trait = c(trait, "Q1_pLDDT")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$Q1_pLLDT,
-              data2$Q1_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-#Q2_pLDDT TESTS
-
-trait = c(trait, "Q2_pLDDT")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$Q2_pLLDT, data2$Q2_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
+# #Q2 TESTS
+# 
+# trait = c(trait, "Q2_RSA")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$Q2,
+#               data2$Q2)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
+# 
+# #Q3 TESTS
+# 
+# trait = c(trait, "Q3_RSA")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$Q3,
+#               data2$Q3)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
+# 
+# #MAX TESTS
+# 
+# trait = c(trait, "MAX_RSA")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$MAX,
+#               data2$MAX)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
+# 
+# #MIN_pLDDT TESTS
+# 
+# trait = c(trait, "MIN_pLDDT")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$MIN_pLLDT,
+#               data2$MIN_pLLDT)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
+# 
+# #Q1_pLDDT TESTS
+# 
+# trait = c(trait, "Q1_pLDDT")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$Q1_pLLDT,
+#               data2$Q1_pLLDT)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
+# 
+# #Q2_pLDDT TESTS
+# 
+# trait = c(trait, "Q2_pLDDT")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$Q2_pLLDT, data2$Q2_pLLDT)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
 
 #Q3_pLDDT TESTS
 
@@ -362,16 +362,16 @@ conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
-#MAX_pLDDT TESTS
-
-trait = c(trait, "MAX_pLDDT")
-pair = c(pair, "sQTL vs non_sQTL")
-test_type = c(test_type, "ks")
-out = ks_stat(data$MAX_pLLDT, data2$MAX_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
+# #MAX_pLDDT TESTS
+# 
+# trait = c(trait, "MAX_pLDDT")
+# pair = c(pair, "sQTL vs non_sQTL")
+# test_type = c(test_type, "ks")
+# out = ks_stat(data$MAX_pLLDT, data2$MAX_pLLDT)
+# pval = c(pval, out[1])
+# conf_low = c(conf_low, out[3])
+# conf_top = c(conf_top, out[4])
+# stat = c(stat, out[2])
 
 # #UNSTRUC TESTS
 # unstruc = data.frame("sQTL" = c(nrow(data_unstruc), nrow(data) - nrow(data_unstruc)),
@@ -598,17 +598,17 @@ to_draw$alpha = ifelse((to_draw$test_type == "ks"  & ((to_draw$conf_low <= 0 & t
 
 
 ggplot(to_draw[to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) +
+        geom_pointrange(aes(x = trait, y = log(as.numeric(statistics)), ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +
         ylab("Enrichment in non sQTLs                                                                  Enrichment in sQTLs\n log(odd_ratio)") + 
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + coord_flip()  + 
+        #geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + coord_flip()  + 
   geom_hline(yintercept = line1, color="red") + guides(alpha = FALSE) + gtex_v8_figure_theme()
 ggsave('statistical_summary_fisher_sQTL_non_sQTL.png', path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 line1 = replicate(length(pval), 0.0)
 ggplot(to_draw[to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics))) +
-        geom_point(size = 4) +
+        geom_pointrange(aes(x = trait, y = as.numeric(statistics), ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) +
         ylab("Enrichment in non sQTLs                                                                  Enrichment in sQTLs\n m1-m2") + 
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + coord_flip() + 
+        # geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + coord_flip() + 
   geom_hline(yintercept = line1, color="red") + gtex_v8_figure_theme() + guides(alpha = FALSE)
 
 
@@ -621,6 +621,10 @@ ggplot() + geom_density(data=data[data$DIP_P <= 0.05, ], aes(DIP, fill="sQTL"), 
 ggplot() + geom_density(data=data[data$DIP_P <= 0.05, ], aes(-log10(DIP_P), fill="sQTL"), alpha = 0.2) + geom_density(data=data2[data2$DIP_P <= 0.05, ], aes(-log10(DIP_P), fill="non sQTL"), alpha = 0.2)
 min(data2$DIP_P, na.rm=T)
 View(data[data$DIP_P <= 0.001 & !is.na(data$DIP_P), ])
+
+
+
+write.csv(to_draw, "Data/to_draw_sQTL.csv", quote=F, row.names = F)
 # 
 #
 # tr = "_pLDDT"

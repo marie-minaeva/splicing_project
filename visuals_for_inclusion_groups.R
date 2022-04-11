@@ -724,6 +724,7 @@ ggsave("statistical_summary_ks_inclusion_groups.png", path = "Data/visuals/", he
 
 
 
+write.csv(to_draw, "Data/to_draw_inclusion_groups.csv", quote=F, row.names = F)
 
 
 

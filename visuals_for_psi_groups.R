@@ -1,6 +1,6 @@
 setwd("~/splicing_project/")
 data_full = read.csv("Data/combined_sQTL_data.csv")
-data_non_s = read.csv("Data/output_data_non_sQTL.csv")
+data_non_s = read.csv("Data/output_non_sQTL_full.csv")
 data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", sep='\t', header = T)
 
 ncol(data_full)
@@ -19,15 +19,12 @@ length(anc_psi)
 length(der_psi)
 data_full$anc_psi = anc_psi
 data_full$der_psi = der_psi
-
-data1 = data_full[data_full$mean_01_psi < 0.5 & data_full$anc_psi < data_full$mean_01_psi & data_full$mean_01_psi < data_full$der_psi, ]
+View(data_full)
+data1 = data_full[(data_full$anc_psi < data_full$mean_01_psi) & (data_full$mean_01_psi < data_full$der_psi), ]
 nrow(data1)
-data2 = data_full[data_full$mean_01_psi < 0.5 & data_full$anc_psi > data_full$mean_01_psi & data_full$mean_01_psi > data_full$der_psi, ]
+data2 = data_full[(data_full$anc_psi > data_full$mean_01_psi) & (data_full$mean_01_psi > data_full$der_psi), ]
 nrow(data2)
-data3 = data_full[data_full$mean_01_psi > 0.5 & data_full$anc_psi < data_full$mean_01_psi & data_full$mean_01_psi < data_full$der_psi, ]
-nrow(data3)
-data4 = data_full[data_full$mean_01_psi > 0.5 & data_full$anc_psi > data_full$mean_01_psi & data_full$mean_01_psi > data_full$der_psi, ]
-nrow(data4)
+
 
 library(ggplot2)
 library(gridExtra)
@@ -119,303 +116,51 @@ ks_stat = function(x, y){
         return(c(pval, stat, conf_low, conf_top))
 }
 
-# 
-# data = data[!flag_outliers(data$LENGTH),]
-# data2 = data2[!flag_outliers(data2$LENGTH),]
-# nrow(data)
-# nrow(data2)
-# # View(data)
-# # View(data[!flag_outliers(data$LENGTH) & data$LENGTH!=0 ,])
-# dev.off()
-
 
 data = data[!flag_outliers(data$LENGTH) & data$LENGTH >= 15,]
 data2 = data2[!flag_outliers(data2$LENGTH) & data2$LENGTH >= 15,]
-data3 = data3[!flag_outliers(data3$LENGTH) & data3$LENGTH >= 15,]
-data4 = data4[!flag_outliers(data4$LENGTH) & data4$LENGTH >= 15,]
 
-data1$GROUP = 1
-data2$GROUP = 2
-data3$GROUP = 3
-data4$GROUP = 4
-
-data_full = rbind(data1, data2, data3, data4)
-
-data_full$ASN.. = data_full$ASN../data_full$LENGTH *100
-
-data_full$CYS.. = data_full$CYS../data_full$LENGTH *100
-data_full$GROUP = as.factor(data_full$GROUP)
+data1$GROUP = "Increasing"
+data2$GROUP = "Decreasing"
 
 
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "LENGTH", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("LENGTH")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 600)  
-plot2 = ggdensity(data_full, x = "LENGTH",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("LENGTH")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-ggsave("descriptive_analysis_length_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
+# plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "LENGTH", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("LENGTH")
+# my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
+# plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
+#         stat_compare_means(label.y = 600)  
+# plot2 = ggdensity(data_full, x = "LENGTH",
+#                   add = "mean", rug = TRUE,
+#                   color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("LENGTH")
+# plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+#         geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+# plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
+#                    layout_matrix = rbind(c(1, 2, 3)))
+# ggsave("descriptive_analysis_length_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
 
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "ASN..", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("ASN../LENGTH *100")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 50)
-plot2 = ggdensity(data_full, x = "ASN..",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("ASN..")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_ASN_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "CYS..", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("CYS../LENGTH *100")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 50)
-plot2 = ggdensity(data_full, x = "CYS..",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("CYS..")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_CYS_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MIN", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MIN")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 170)
-plot2 = ggdensity(data_full, x = "MIN",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MIN")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_MIN_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q1", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q1")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 175)
-plot2 = ggdensity(data_full, x = "Q1",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q1")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q1_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q2", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q2")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 170)
-plot2 = ggdensity(data_full, x = "Q2",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q2")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q2_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q3", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q3")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 150)
-plot2 = ggdensity(data_full, x = "Q3",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q3")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q3_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MAX", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MAX")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 220)
-plot2 = ggdensity(data_full, x = "MAX",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MAX")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_MAX_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MIN_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MIN_pLDDT")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 190)
-plot2 = ggdensity(data_full, x = "MIN_pLLDT",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MIN_pLDDT")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_MIN_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q1_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q1_pLDDT")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 190)
-plot2 = ggdensity(data_full, x = "Q1_pLLDT",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q1_pLDDT")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q1_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q2_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q2_pLDDT")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 170)
-plot2 = ggdensity(data_full, x = "Q2_pLLDT",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q2_pLDDT")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q2_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "Q3_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("Q3_pLDDT")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 170)
-plot2 = ggdensity(data_full, x = "Q3_pLLDT",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("Q3_pLDDT")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-ggsave("descriptive_analysis_Q3_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-
-plot1 =  ggboxplot(data=data_full, x = "GROUP", y = "MAX_pLLDT", color="GROUP") + gtex_v8_figure_theme() +  ggtitle("MAX_pLDDT")
-my_comparisons <- list( c("1", "2"), c("1", "3"), c("1", "4"), c("2", "4"), c("3", "4"), c("2", "3") )
-plot1 = plot1 + stat_compare_means(comparisons = my_comparisons) + # Add pairwise comparisons p-value
-        stat_compare_means(label.y = 150)
-plot2 = ggdensity(data_full, x = "MAX_pLLDT",
-                  add = "mean", rug = TRUE,
-                  color = "GROUP", fill = "GROUP", alpha = 0.3) + gtex_v8_figure_theme()  + ggtitle("MAX_pLDDT")
-plot3 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, plot3, widths = c(1, 1, 1),
-                   layout_matrix = rbind(c(1, 2, 3)))
-
-#ggMarginal(plot1, type="histogram")
-
-ggsave("descriptive_analysis_MAX_pLLDT_psi.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-data_full %>% 
-        count(HELIX, GROUP) %>% 
-        mutate(perc = n) -> data_full_2
-data_full_2 = data_full_2[1:8, ]
-data_full_2$perc[1] = data_full_2$perc[1]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[2] = data_full_2$perc[2]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[3] = data_full_2$perc[3]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[4] = data_full_2$perc[4]/(data_full_2$n[4] + data_full_2$n[8])
-data_full_2$perc[5] = data_full_2$perc[5]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
-
-plot1 = gghistogram(data_full_2, x = "HELIX", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
-        #geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
-
-plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
-
-ggsave("descriptive_analysis_HELIX_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-data_full %>% 
-        count(SHEET, GROUP) %>% 
-        mutate(perc = n ) -> data_full_2
-
-data_full_2 = data_full_2[1:8, ]
-data_full_2$perc[1] = data_full_2$perc[1]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[2] = data_full_2$perc[2]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[3] = data_full_2$perc[3]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[4] = data_full_2$perc[4]/(data_full_2$n[4] + data_full_2$n[8])
-data_full_2$perc[5] = data_full_2$perc[5]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
-
-plot1 = gghistogram(data_full_2, x = "SHEET", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
-#geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
-
-plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
-ggsave("descriptive_analysis_SHEET_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
-data_full %>% 
-        count(TURN, GROUP) %>% 
-        mutate(perc = n ) -> data_full_2
-
-
-data_full_2 = data_full_2[1:8, ]
-data_full_2$perc[1] = data_full_2$perc[1]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[2] = data_full_2$perc[2]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[3] = data_full_2$perc[3]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[4] = data_full_2$perc[4]/(data_full_2$n[4] + data_full_2$n[8])
-data_full_2$perc[5] = data_full_2$perc[5]/(data_full_2$n[1] + data_full_2$n[5])
-data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
-data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
-data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
-
-plot1 = gghistogram(data_full_2, x = "TURN", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
-#geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
-
-plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
-        geom_text(stat='count', aes(label=..count..), vjust=-0.5)
-plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
-                   layout_matrix = rbind(c(1, 2)))
-ggsave("descriptive_analysis_TURN_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
-
+# data_full %>% 
+#         count(HELIX, GROUP) %>% 
+#         mutate(perc = n) -> data_full_2
+# data_full_2 = data_full_2[1:8, ]
+# data_full_2$perc[1] = data_full_2$perc[1]/(data_full_2$n[1] + data_full_2$n[5])
+# data_full_2$perc[2] = data_full_2$perc[2]/(data_full_2$n[2] + data_full_2$n[6])
+# data_full_2$perc[3] = data_full_2$perc[3]/(data_full_2$n[3] + data_full_2$n[7])
+# data_full_2$perc[4] = data_full_2$perc[4]/(data_full_2$n[4] + data_full_2$n[8])
+# data_full_2$perc[5] = data_full_2$perc[5]/(data_full_2$n[1] + data_full_2$n[5])
+# data_full_2$perc[6] = data_full_2$perc[6]/(data_full_2$n[2] + data_full_2$n[6])
+# data_full_2$perc[7] = data_full_2$perc[7]/(data_full_2$n[3] + data_full_2$n[7])
+# data_full_2$perc[8] = data_full_2$perc[8]/(data_full_2$n[4] + data_full_2$n[8])
+# 
+# plot1 = gghistogram(data_full_2, x = "HELIX", y="perc", rug = F, color = "GROUP", fill = "GROUP", stat="identity", position = "dodge")  #+ 
+#         #geom_text(stat='identity', aes(label=..count..), vjust=-0.5, position = position_dodge2())
+# 
+# plot2 = gghistogram(data_full, x = "GROUP", rug = F, color = "GROUP", fill = "GROUP", stat="count") + 
+#         geom_text(stat='count', aes(label=..count..), vjust=-0.5)
+# plot = arrangeGrob(plot1, plot2, widths = c(1, 1),
+#                    layout_matrix = rbind(c(1, 2)))
+# 
+# ggsave("descriptive_analysis_HELIX_psi.png", path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 
 data1_unstruc = data1[data1$Q2 > 40.0 & data1$Q2_pLLDT < 50.0, ]
@@ -424,20 +169,6 @@ nrow(data1_unstruc)
 data2_unstruc = data2[data2$Q2 > 40.0 & data2$Q2_pLLDT < 50.0, ]
 data2_unstruc = data2_unstruc[!is.na(data2_unstruc$GENE.NAME),] # 106/686 = 15,5% 68 signal
 nrow(data2_unstruc)
-data3_unstruc = data3[data3$Q2 > 40.0 & data3$Q2_pLLDT < 50.0, ]
-data3_unstruc = data3_unstruc[!is.na(data3_unstruc$GENE.NAME),] # 84/571 = 14,7% 67 signal
-nrow(data3_unstruc)
-data4_unstruc = data4[data4$Q2 > 40.0 & data4$Q2_pLLDT < 50.0, ]
-data4_unstruc = data4_unstruc[!is.na(data4_unstruc$GENE.NAME),] # 106/686 = 15,5% 68 signal
-nrow(data4_unstruc)
-
-
-
-
-# View(data_unstruc)
-# View(data2_unstruc)
-# View(data3_unstruc)
-#write.csv(data_unstruc, "Data/output_data_sQTL_unstruc.csv", row.names = F)
 
 
 data1_struc = data1[data1$Q2 < 25.0 & data1$Q2_pLLDT >= 90.0, ]
@@ -448,18 +179,7 @@ data2_struc = data2[data2$Q2 < 25.0 & data2$Q2_pLLDT >= 90.0, ]
 data2_struc = data2_struc[!is.na(data2_struc$GENE.NAME),] # 108/686 = 15,7% 66 signals
 nrow(data2_struc)
 
-data3_struc = data3[data3$Q2 < 25.0 & data3$Q2_pLLDT >= 90.0, ]
-data3_struc = data3_struc[!is.na(data3_struc$GENE.NAME),] # 105/571 = 18,4% 69 signals
-nrow(data3_struc)
 
-data4_struc = data4[data4$Q2 < 25.0 & data4$Q2_pLLDT >= 90.0, ]
-data4_struc = data4_struc[!is.na(data4_struc$GENE.NAME),] # 108/686 = 15,7% 66 signals
-nrow(data4_struc)
-# View(data2_struc)
-# View(data_struc)
-# View(data2_struc)
-# View(data3_struc)
-#write.csv(data_struc, "Data/output_data_sQTL_struc.csv", row.names = F)
 
 data1_cons = data1[data1$Q2_pLLDT >= 90.0, ]
 data1_cons = data1_cons[!is.na(data1_cons$GENE.NAME),] # 230/571 = 40,1% 156 signals
@@ -467,17 +187,6 @@ nrow(data1_cons)
 data2_cons = data2[data2$Q2_pLLDT >= 90.0, ]
 data2_cons = data2_cons[!is.na(data2_cons$GENE.NAME),] # 246/686 = 35,8% 162 signals
 nrow(data2_cons)
-data3_cons = data3[data3$Q2_pLLDT >= 90.0, ]
-data3_cons = data3_cons[!is.na(data3_cons$GENE.NAME),] # 230/571 = 40,1% 156 signals
-nrow(data3_cons)
-data4_cons = data4[data4$Q2_pLLDT >= 90.0, ]
-data4_cons = data4_cons[!is.na(data4_cons$GENE.NAME),] # 246/686 = 35,8% 162 signals
-nrow(data4_cons)
-
-# View(data_cons)
-# View(data2_cons)
-# View(data3_cons)
-#write.csv(data_cons, "Data/output_data_sQTL_potent_cons.csv", row.names = F)
 
 
 data1_loop = data1[data1$TURN == "True" & data1$HELIX == "False" & data1$SHEET == "False", ]
@@ -486,190 +195,21 @@ nrow(data1_loop)
 data2_loop = data2[data2$TURN == "True" & data2$HELIX == "False" & data2$SHEET == "False", ]
 data2_loop = data2_loop[!is.na(data2_loop$GENE.NAME),] # 54/686 = 7,9 % 32 signal
 nrow(data2_loop)
-data3_loop = data3[data3$TURN == "True" & data3$HELIX == "False" & data3$SHEET == "False", ]
-data3_loop = data3_loop[!is.na(data3_loop$GENE.NAME),] # 59/571 = 10,3 % 37 signal
-nrow(data3_loop)
-data4_loop = data4[data4$TURN == "True" & data4$HELIX == "False" & data4$SHEET == "False", ]
-data4_loop = data4_loop[!is.na(data4_loop$GENE.NAME),] # 54/686 = 7,9 % 32 signal
-nrow(data4_loop)
-# View(data_loop)
-# View(data2_loop)
-# View(data3_loop)
-#write.csv(data_loop, "Data/output_data_sQTL_loop_cut.csv", row.names = F)
-# 
-# dev.off()
-# to_draw = data.frame()
-# 
-# pa = replicate(round(nrow(data1_unstruc) / nrow(data1) * 100), "1")
-# pa = c(pa, replicate(round(nrow(data2_unstruc) / nrow(data2) * 100), "2"))
-# pa = c(pa, replicate(round(nrow(data3_unstruc) / nrow(data3) * 100), "3"))
-# pa = c(pa, replicate(round(nrow(data4_unstruc) / nrow(data4) * 100), "4"))
-# length(pa)
-# pa = c(pa, replicate(round(nrow(data1_struc) / nrow(data1) * 100), "1"))
-# pa = c(pa, replicate(round(nrow(data2_struc) / nrow(data2) * 100), "2"))
-# pa = c(pa, replicate(round(nrow(data3_struc) / nrow(data3) * 100), "3"))
-# pa = c(pa, replicate(round(nrow(data4_struc) / nrow(data4) * 100), "4"))
-# 
-# pa = c(pa, replicate(round(nrow(data1_cons) / nrow(data1) * 100), "1"))
-# pa = c(pa, replicate(round(nrow(data2_cons) / nrow(data2) * 100), "2"))
-# pa = c(pa, replicate(round(nrow(data3_cons) / nrow(data3) * 100), "3"))
-# pa = c(pa, replicate(round(nrow(data4_cons) / nrow(data4) * 100), "4"))
-# 
-# pa = c(pa, replicate(round(nrow(data1_loop) / nrow(data1) * 100), "1"))
-# pa = c(pa, replicate(round(nrow(data2_loop) / nrow(data2) * 100), "2"))
-# pa = c(pa, replicate(round(nrow(data3_loop) / nrow(data3) * 100), "3"))
-# pa = c(pa, replicate(round(nrow(data4_loop) / nrow(data4) * 100), "4"))
-# 
-# trait = replicate(round(nrow(data1_unstruc) / nrow(data1)*100) + round(nrow(data2_unstruc) / nrow(data2)*100) + round(nrow(data3_unstruc) / nrow(data3)*100) + round(nrow(data4_unstruc) / nrow(data4)*100), "Unstructured")
-# trait = c(trait, replicate(round(nrow(data1_struc) / nrow(data1)*100) + round(nrow(data2_struc) / nrow(data2)*100) + round(nrow(data3_struc) / nrow(data3)*100) + round(nrow(data4_struc) / nrow(data4)*100), "Structured"))
-# trait = c(trait, replicate(round(nrow(data1_cons) / nrow(data1)*100) + round(nrow(data2_cons) / nrow(data2)*100) + round(nrow(data3_cons) / nrow(data3)*100) + round(nrow(data4_cons) / nrow(data4)*100), "Conserved"))
-# trait = c(trait, replicate(round(nrow(data1_loop) / nrow(data1)*100) + round(nrow(data2_loop) / nrow(data2)*100) + round(nrow(data3_loop) / nrow(data3)*100) + round(nrow(data4_loop) / nrow(data4)*100), "Loop"))
-# 
-# print(length(pa))
-# print(length(trait))
-# to_draw = cbind(trait, pa)
-# to_draw
-# colnames(to_draw) = c("trait", "pair")
-# to_draw = data.frame(to_draw)
-# to_draw
-# ggplot(to_draw, aes(fill = as.factor(pa), x=trait)) + gtex_v8_figure_theme() + geom_bar(position = position_dodge())  +theme(axis.text.x = element_text( vjust = 0.5, hjust=1, size = 10), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8))  + labs(fill='Group') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + ylab("proportion")
-# ggsave("structure_bars_among_groups.png", height = 3.11, width = 7.92,path = "Data/visuals/", device='png', dpi=700)
-# to_draw
-# table(to_draw)[1, ]
-# chisq.test(table(to_draw)[1, ])
-# chisq.test(table(to_draw)[2, ])
-# chisq.test(table(to_draw)[3, ])
-# chisq.test(table(to_draw)[4, ])
+
 pval = c()
-pair = c()
+# pair = c()
 trait = c()
 conf_low = c()
 conf_top = c()
 stat = c()
 test_type = c()
-# 
-# 
-# #HYDROPATHICITY TESTS
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data2[!flag_outliers(data2$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data3[!flag_outliers(data3$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data4[!flag_outliers(data4$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data3[!flag_outliers(data3$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data4[!flag_outliers(data4$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Hydropathicity")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$HYDROPATHICITY),]$HYDROPATHICITY,
-#               data4[!flag_outliers(data4$HYDROPATHICITY),]$HYDROPATHICITY)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
 
 #LENGTH TESTS
 
 trait = c(trait, "Length")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1$LENGTH, data2$LENGTH)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Length")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1$LENGTH, data3$LENGTH)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Length")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1$LENGTH, data4$LENGTH)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Length")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2$LENGTH, data3$LENGTH)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Length")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2$LENGTH, data4$LENGTH)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Length")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3$LENGTH, data4$LENGTH)
 pval = c(pval, out[1])
 conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
@@ -679,7 +219,7 @@ stat = c(stat, out[2])
 #ASN... TESTS
 
 trait = c(trait, "% ASN")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1[!flag_outliers(data1$ASN../data1$LENGTH *100),]$ASN../data1$LENGTH*100, 
               data2[!flag_outliers(data2$ASN../data2$LENGTH *100),]$ASN../data2$LENGTH*100)
@@ -689,60 +229,6 @@ conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
 
-trait = c(trait, "% ASN")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$ASN../data1$LENGTH *100),]$ASN../data1$LENGTH*100, 
-              data3[!flag_outliers(data3$ASN../data3$LENGTH *100),]$ASN../data3$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "% ASN")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$ASN../data1$LENGTH *100),]$ASN../data1$LENGTH*100, 
-              data4[!flag_outliers(data4$ASN../data4$LENGTH *100),]$ASN../data4$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "% ASN")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$ASN../data2$LENGTH *100),]$ASN../data2$LENGTH*100, 
-              data3[!flag_outliers(data3$ASN../data3$LENGTH *100),]$ASN../data3$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "% ASN")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$ASN../data2$LENGTH *100),]$ASN../data2$LENGTH*100, 
-              data4[!flag_outliers(data4$ASN../data4$LENGTH *100),]$ASN../data4$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "% ASN")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3[!flag_outliers(data3$ASN../data3$LENGTH *100),]$ASN../data3$LENGTH*100, 
-              data4[!flag_outliers(data4$ASN../data4$LENGTH *100),]$ASN../data4$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
 
 
 
@@ -750,7 +236,7 @@ stat = c(stat, out[2])
 #CYS.. TESTS
 
 trait = c(trait, "% CYS")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1[!flag_outliers(data1$CYS../data1$LENGTH *100),]$CYS../data1$LENGTH*100, 
               data2[!flag_outliers(data2$CYS../data2$LENGTH *100),]$CYS../data2$LENGTH*100)
@@ -759,63 +245,13 @@ conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
-trait = c(trait, "% CYS")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$CYS../data1$LENGTH *100),]$CYS../data1$LENGTH*100, 
-              data3[!flag_outliers(data3$CYS../data3$LENGTH *100),]$CYS../data3$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "% CYS")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$CYS../data1$LENGTH *100),]$CYS../data1$LENGTH*100, 
-              data4[!flag_outliers(data4$CYS../data4$LENGTH *100),]$CYS../data4$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "% CYS")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$CYS../data2$LENGTH *100),]$CYS../data2$LENGTH*100, 
-              data3[!flag_outliers(data3$CYS../data3$LENGTH *100),]$CYS../data3$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "% CYS")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$CYS../data2$LENGTH *100),]$CYS../data2$LENGTH*100, 
-              data4[!flag_outliers(data4$CYS../data4$LENGTH *100),]$CYS../data3$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "% CYS")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3[!flag_outliers(data3$CYS../data3$LENGTH *100),]$CYS../data3$LENGTH*100, 
-              data4[!flag_outliers(data4$CYS../data4$LENGTH *100),]$CYS../data4$LENGTH*100)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
 
 
 
 # SYM TESTS
 
 trait = c(trait, "Symm_dist")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1[!flag_outliers(data1$LENGTH %% 3),]$LENGTH %% 3, 
               data2[!flag_outliers(data2$LENGTH %% 3),]$LENGTH %% 3.)
@@ -824,126 +260,11 @@ conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
-trait = c(trait, "Symm_dist")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$LENGTH %% 3),]$LENGTH %% 3, 
-              data3[!flag_outliers(data3$LENGTH %% 3),]$LENGTH %% 3.)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Symm_dist")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$LENGTH %% 3),]$LENGTH %% 3, 
-              data4[!flag_outliers(data4$LENGTH %% 3),]$LENGTH %% 3.)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Symm_dist")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$LENGTH %% 3),]$LENGTH %% 3, 
-              data3[!flag_outliers(data3$LENGTH %% 3),]$LENGTH %% 3.)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "Symm_dist")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$LENGTH %% 3),]$LENGTH %% 3, 
-              data4[!flag_outliers(data4$LENGTH %% 3),]$LENGTH %% 3.)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Symm_dist")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3[!flag_outliers(data3$LENGTH %% 3),]$LENGTH %% 3, 
-              data4[!flag_outliers(data4$LENGTH %% 3),]$LENGTH %% 3.)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-# 
-# 
-# #MIN TESTS
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN),]$MIN, data2[!flag_outliers(data2$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN),]$MIN, data3[!flag_outliers(data3$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN),]$MIN, data4[!flag_outliers(data4$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MIN),]$MIN, data3[!flag_outliers(data3$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MIN),]$MIN, data4[!flag_outliers(data4$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_RSA")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$MIN),]$MIN, data4[!flag_outliers(data4$MIN),]$MIN)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# 
 
 #Q1 TESTS
 
 trait = c(trait, "Q1_RSA")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1[!flag_outliers(data1$Q1),]$Q1, data2[!flag_outliers(data2$Q1),]$Q1)
 pval = c(pval, out[1])
@@ -952,448 +273,10 @@ conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
 
 
-trait = c(trait, "Q1_RSA")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$Q1),]$Q1, data3[!flag_outliers(data3$Q1),]$Q1)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q1_RSA")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$Q1),]$Q1, data4[!flag_outliers(data4$Q1),]$Q1)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q1_RSA")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$Q1),]$Q1, data3[!flag_outliers(data3$Q1),]$Q1)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "Q1_RSA")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$Q1),]$Q1, data4[!flag_outliers(data4$Q1),]$Q1)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q1_RSA")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3[!flag_outliers(data3$Q1),]$Q1, data4[!flag_outliers(data4$Q1),]$Q1)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-# 
-# 
-# #Q2 TESTS
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2),]$Q2, data2[!flag_outliers(data2$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2),]$Q2, data3[!flag_outliers(data3$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2),]$Q2, data4[!flag_outliers(data4$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q2),]$Q2, data3[!flag_outliers(data3$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q2),]$Q2, data4[!flag_outliers(data4$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_RSA")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$Q2),]$Q2, data4[!flag_outliers(data4$Q2),]$Q2)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# #Q3 TESTS
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q3),]$Q3, data2[!flag_outliers(data2$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q3),]$Q3, data3[!flag_outliers(data3$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q3),]$Q3, data4[!flag_outliers(data4$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q3),]$Q3, data3[!flag_outliers(data3$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q3),]$Q3, data4[!flag_outliers(data4$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Q3_RSA")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$Q3),]$Q3, data4[!flag_outliers(data4$Q3),]$Q3)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# 
-# 
-# 
-# #MAX TESTS
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX),]$MAX, data2[!flag_outliers(data2$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX),]$MAX, data3[!flag_outliers(data3$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX),]$MAX, data4[!flag_outliers(data4$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MAX),]$MAX, data3[!flag_outliers(data3$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MAX),]$MAX, data4[!flag_outliers(data4$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MAX_RSA")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$MAX),]$MAX, data4[!flag_outliers(data4$MAX),]$MAX)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# 
-# #MIN_pLDDT TESTS
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN_pLLDT),]$MIN_pLLDT, 
-#               data2[!flag_outliers(data2$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN_pLLDT),]$MIN_pLLDT, 
-#               data3[!flag_outliers(data3$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MIN_pLLDT),]$MIN_pLLDT, 
-#               data4[!flag_outliers(data4$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MIN_pLLDT),]$MIN_pLLDT, 
-#               data3[!flag_outliers(data3$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MIN_pLLDT),]$MIN_pLLDT, 
-#               data4[!flag_outliers(data4$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MIN_pLDDT")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$MIN_pLLDT),]$MIN_pLLDT, 
-#               data4[!flag_outliers(data4$MIN_pLLDT),]$MIN_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# #Q1_pLDDT TESTS
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q1_pLLDT),]$Q1_pLLDT, 
-#               data2[!flag_outliers(data2$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q1_pLLDT),]$Q1_pLLDT, 
-#               data3[!flag_outliers(data3$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q1_pLLDT),]$Q1_pLLDT, 
-#               data4[!flag_outliers(data4$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q1_pLLDT),]$Q1_pLLDT, 
-#               data3[!flag_outliers(data3$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q1_pLLDT),]$Q1_pLLDT, 
-#               data4[!flag_outliers(data4$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q1_pLDDT")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$Q1_pLLDT),]$Q1_pLLDT, 
-#               data4[!flag_outliers(data4$Q1_pLLDT),]$Q1_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-
-# 
-# #Q2_pLDDT TESTS
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2_pLLDT),]$Q2_pLLDT, 
-#               data2[!flag_outliers(data2$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2_pLLDT),]$Q2_pLLDT, 
-#               data3[!flag_outliers(data3$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$Q2_pLLDT),]$Q2_pLLDT, 
-#               data4[!flag_outliers(data4$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q2_pLLDT),]$Q2_pLLDT, 
-#               data3[!flag_outliers(data3$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$Q2_pLLDT),]$Q2_pLLDT, 
-#               data4[!flag_outliers(data4$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "Q2_pLDDT")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$Q2_pLLDT),]$Q2_pLLDT, 
-#               data4[!flag_outliers(data4$Q2_pLLDT),]$Q2_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-
-
 #Q3_pLDDT TESTS
 
 trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 test_type = c(test_type, "ks")
 out = ks_stat(data1[!flag_outliers(data1$Q3_pLLDT),]$Q3_pLLDT,
               data2[!flag_outliers(data2$Q3_pLLDT),]$Q3_pLLDT)
@@ -1401,426 +284,6 @@ pval = c(pval, out[1])
 conf_low = c(conf_low, out[3])
 conf_top = c(conf_top, out[4])
 stat = c(stat, out[2])
-
-
-trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "1 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$Q3_pLLDT),]$Q3_pLLDT,
-              data3[!flag_outliers(data3$Q3_pLLDT),]$Q3_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "1 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data1[!flag_outliers(data1$Q3_pLLDT),]$Q3_pLLDT,
-              data4[!flag_outliers(data4$Q3_pLLDT),]$Q3_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "2 vs 3")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$Q3_pLLDT),]$Q3_pLLDT,
-              data3[!flag_outliers(data3$Q3_pLLDT),]$Q3_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "2 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data2[!flag_outliers(data2$Q3_pLLDT),]$Q3_pLLDT,
-              data4[!flag_outliers(data4$Q3_pLLDT),]$Q3_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-trait = c(trait, "Q3_pLDDT")
-pair = c(pair, "3 vs 4")
-test_type = c(test_type, "ks")
-out = ks_stat(data3[!flag_outliers(data3$Q3_pLLDT),]$Q3_pLLDT,
-              data4[!flag_outliers(data4$Q3_pLLDT),]$Q3_pLLDT)
-pval = c(pval, out[1])
-conf_low = c(conf_low, out[3])
-conf_top = c(conf_top, out[4])
-stat = c(stat, out[2])
-
-
-
-# #MAX_pLDDT TESTS
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "1 vs 2")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX_pLLDT),]$MAX_pLLDT, 
-#               data2[!flag_outliers(data2$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "1 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX_pLLDT),]$MAX_pLLDT, 
-#               data3[!flag_outliers(data3$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "1 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data1[!flag_outliers(data1$MAX_pLLDT),]$MAX_pLLDT, 
-#               data4[!flag_outliers(data4$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "2 vs 3")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(dat2$MAX_pLLDT),]$MAX_pLLDT, 
-#               data3[!flag_outliers(data3$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "2 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data2[!flag_outliers(data2$MAX_pLLDT),]$MAX_pLLDT, 
-#               data4[!flag_outliers(data4$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# trait = c(trait, "MAX_pLDDT")
-# pair = c(pair, "3 vs 4")
-# test_type = c(test_type, "ks")
-# out = ks_stat(data3[!flag_outliers(data3$MAX_pLLDT),]$MAX_pLLDT, 
-#               data4[!flag_outliers(data4$MAX_pLLDT),]$MAX_pLLDT)
-# pval = c(pval, out[1])
-# conf_low = c(conf_low, out[3])
-# conf_top = c(conf_top, out[4])
-# stat = c(stat, out[2])
-# 
-# 
-# #UNSTRUC TESTS
-# unstruc = data.frame("sQTL" = c(nrow(data1_unstruc), nrow(data1) - nrow(data1_unstruc)),
-#                      "non_sQTL" = c(nrow(data2_unstruc), nrow(data2) - nrow(data2_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "1 vs 2")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# unstruc = data.frame("sQTL" = c(nrow(data1_unstruc), nrow(data1) - nrow(data1_unstruc)),
-#                      "non_sQTL" = c(nrow(data3_unstruc), nrow(data3) - nrow(data3_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "1 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# unstruc = data.frame("sQTL" = c(nrow(data1_unstruc), nrow(data1) - nrow(data1_unstruc)),
-#                      "non_sQTL" = c(nrow(data4_unstruc), nrow(data4) - nrow(data4_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "1 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# unstruc = data.frame("sQTL" = c(nrow(data2_unstruc), nrow(data2) - nrow(data2_unstruc)),
-#                      "non_sQTL" = c(nrow(data3_unstruc), nrow(data3) - nrow(data3_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "2 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# unstruc = data.frame("sQTL" = c(nrow(data2_unstruc), nrow(data2) - nrow(data2_unstruc)),
-#                      "non_sQTL" = c(nrow(data4_unstruc), nrow(data4) - nrow(data4_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "2 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# unstruc = data.frame("sQTL" = c(nrow(data3_unstruc), nrow(data3) - nrow(data3_unstruc)),
-#                      "non_sQTL" = c(nrow(data4_unstruc), nrow(data4) - nrow(data4_unstruc)),
-#                      #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                      row.names = c("unstruc", "other"),
-#                      stringsAsFactors = FALSE)
-# 
-# unstruc
-# test = fisher.test(unstruc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Unstructured")
-# pair = c(pair, "3 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# 
-# 
-# 
-# # STRUC TESTS
-# struc = data.frame("sQTL" = c(nrow(data1_struc), nrow(data1)-nrow(data1_struc)),
-#                    "non_sQTL" = c(nrow(data2_struc), nrow(data2)-nrow(data2_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "1 vs 2")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# struc = data.frame("sQTL" = c(nrow(data1_struc), nrow(data1)-nrow(data1_struc)),
-#                    "non_sQTL" = c(nrow(data3_struc), nrow(data3)-nrow(data3_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "1 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# struc = data.frame("sQTL" = c(nrow(data1_struc), nrow(data1)-nrow(data1_struc)),
-#                    "non_sQTL" = c(nrow(data4_struc), nrow(data4)-nrow(data4_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "1 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# struc = data.frame("sQTL" = c(nrow(data2_struc), nrow(data2)-nrow(data2_struc)),
-#                    "non_sQTL" = c(nrow(data3_struc), nrow(data3)-nrow(data3_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "2 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# struc = data.frame("sQTL" = c(nrow(data2_struc), nrow(data2)-nrow(data2_struc)),
-#                    "non_sQTL" = c(nrow(data4_struc), nrow(data4)-nrow(data4_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "2 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# struc = data.frame("sQTL" = c(nrow(data3_struc), nrow(data3)-nrow(data3_struc)),
-#                    "non_sQTL" = c(nrow(data4_struc), nrow(data4)-nrow(data4_struc)),
-#                    #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                    row.names = c("struc", "other"),
-#                    stringsAsFactors = FALSE)
-# 
-# struc
-# test = fisher.test(struc)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Structured")
-# pair = c(pair, "3 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# 
-# 
-# # CONSERVED TESTS
-# cons = data.frame("sQTL" = c(nrow(data1_cons), nrow(data1) - nrow(data1_cons)),
-#                   "non_sQTL" = c(nrow(data2_cons), nrow(data2) - nrow(data2_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "1 vs 2")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# cons = data.frame("sQTL" = c(nrow(data1_cons), nrow(data1) - nrow(data1_cons)),
-#                   "non_sQTL" = c(nrow(data3_cons), nrow(data3) - nrow(data3_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "1 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# cons = data.frame("sQTL" = c(nrow(data1_cons), nrow(data1) - nrow(data1_cons)),
-#                   "non_sQTL" = c(nrow(data4_cons), nrow(data4) - nrow(data4_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "1 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# cons = data.frame("sQTL" = c(nrow(data2_cons), nrow(data2) - nrow(data2_cons)),
-#                   "non_sQTL" = c(nrow(data3_cons), nrow(data3) - nrow(data3_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "2 vs 3")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# cons = data.frame("sQTL" = c(nrow(data2_cons), nrow(data2) - nrow(data2_cons)),
-#                   "non_sQTL" = c(nrow(data4_cons), nrow(data4) - nrow(data4_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "2 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-# 
-# cons = data.frame("sQTL" = c(nrow(data3_cons), nrow(data3) - nrow(data3_cons)),
-#                   "non_sQTL" = c(nrow(data4_cons), nrow(data4) - nrow(data4_cons)),
-#                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-#                   row.names = c("cons", "other"),
-#                   stringsAsFactors = FALSE)
-# 
-# cons
-# test = fisher.test(cons)
-# pval = c(pval, test$p.value)
-# trait = c(trait, "Conserved")
-# pair = c(pair, "3 vs 4")
-# conf_low = c(conf_low, test$conf.int[1])
-# conf_top = c(conf_top, test$conf.int[2])
-# stat = c(stat, test$estimate)
-# test_type = c(test_type, "fisher")
-
 
 
 # SYM TESTS
@@ -1834,113 +297,11 @@ symet
 test = fisher.test(symet)
 pval = c(pval, test$p.value)
 trait = c(trait, "Symmetric")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
-
-symet = data.frame("sQTL" = c(length(data1[data1$LENGTH %% 3 == 0,]$LENGTH), length(data1[data1$LENGTH %% 3 != 0,]$LENGTH)),
-                   "non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   row.names = c("sym", "non_sym"),
-                   stringsAsFactors = FALSE)
-
-symet
-test = fisher.test(symet)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symmetric")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet = data.frame("sQTL" = c(length(data1[data1$LENGTH %% 3 == 0,]$LENGTH), length(data1[data1$LENGTH %% 3 != 0,]$LENGTH)),
-                   "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0,]$LENGTH), length(data4[data4$LENGTH %% 3 != 0,]$LENGTH)),
-                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   row.names = c("sym", "non_sym"),
-                   stringsAsFactors = FALSE)
-
-symet
-test = fisher.test(symet)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symmetric")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet = data.frame("sQTL" = c(length(data2[data2$LENGTH %% 3 == 0,]$LENGTH), length(data2[data2$LENGTH %% 3 != 0,]$LENGTH)),
-                   "non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   row.names = c("sym", "non_sym"),
-                   stringsAsFactors = FALSE)
-
-symet
-test = fisher.test(symet)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symmetric")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet = data.frame("sQTL" = c(length(data2[data2$LENGTH %% 3 == 0,]$LENGTH), length(data2[data2$LENGTH %% 3 != 0,]$LENGTH)),
-                   "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0,]$LENGTH), length(data4[data4$LENGTH %% 3 != 0,]$LENGTH)),
-                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   row.names = c("sym", "non_sym"),
-                   stringsAsFactors = FALSE)
-
-symet
-test = fisher.test(symet)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symmetric")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet = data.frame("sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0,]$LENGTH), length(data4[data4$LENGTH %% 3 != 0,]$LENGTH)),
-                   #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0,]$LENGTH), length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)),
-                   row.names = c("sym", "non_sym"),
-                   stringsAsFactors = FALSE)
-
-symet
-test = fisher.test(symet)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symmetric")
-pair = c(pair, "3 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-
-
-pa = c("1", "2", "3", "4", "1", "2", "3", "4")
-tra = c("Symmetric", "Symmetric", "Symmetric", "Symmetric","Non symmetric", "Non symmetric", "Non symmetric", "Non symmetric")
-count = c(length(data1[data1$LENGTH %% 3 == 0,]$LENGTH)/length(data1$LENGTH),
-          length(data2[data2$LENGTH %% 3 == 0,]$LENGTH)/length(data2$LENGTH),
-          length(data3[data3$LENGTH %% 3 == 0,]$LENGTH)/length(data3$LENGTH),
-          length(data4[data4$LENGTH %% 3 == 0,]$LENGTH)/length(data4$LENGTH), 
-          length(data1[data1$LENGTH %% 3 != 0,]$LENGTH)/length(data1$LENGTH),  
-          length(data2[data2$LENGTH %% 3 != 0,]$LENGTH)/length(data2$LENGTH),
-          length(data3[data3$LENGTH %% 3 != 0,]$LENGTH)/length(data3$LENGTH),  
-          length(data4[data4$LENGTH %% 3 != 0,]$LENGTH)/length(data4$LENGTH))
-to_draw = cbind(tra, count)
-to_draw = cbind(to_draw, pa)
-to_draw
-to_draw = data.frame(to_draw)
-colnames(to_draw) = c("trait", "proportion", "Group")
-to_draw$proportion = as.numeric(to_draw$proportion)
-to_draw 
-ggplot(to_draw, aes(fill = as.factor(Group), x=trait, y=proportion )) + gtex_v8_figure_theme() + geom_col(position = position_dodge())  +  theme(axis.text.x = element_text(vjust = 0.5, hjust=1, size = 7), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("proportion") + labs(fill='Group') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5)))
-ggsave("symmetric_bars_among_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 
 # SYM NOT FOUND TESTS
@@ -1953,108 +314,11 @@ symet_not_found
 test = fisher.test(symet_not_found)
 pval = c(pval, test$p.value)
 trait = c(trait, "Symm_not_found")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
-
-symet_not_found = data.frame("sQTL" = c(length(data1[data1$LENGTH %% 3 == 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data1[data1$LENGTH %% 3 != 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             "non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             row.names = c("sym", "non_sym"),
-                             stringsAsFactors = FALSE)
-symet_not_found
-test = fisher.test(symet_not_found)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symm_not_found")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet_not_found = data.frame("sQTL" = c(length(data1[data1$LENGTH %% 3 == 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data1[data1$LENGTH %% 3 != 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data4[data4$LENGTH %% 3 != 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             row.names = c("sym", "non_sym"),
-                             stringsAsFactors = FALSE)
-symet_not_found
-test = fisher.test(symet_not_found)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symm_not_found")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet_not_found = data.frame("sQTL" = c(length(data2[data2$LENGTH %% 3 == 0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data2[data2$LENGTH %% 3 != 0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             "non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             row.names = c("sym", "non_sym"),
-                             stringsAsFactors = FALSE)
-symet_not_found
-test = fisher.test(symet_not_found)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symm_not_found")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet_not_found = data.frame("sQTL" = c(length(data2[data2$LENGTH %% 3 == 0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data2[data2$LENGTH %% 3 != 0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data4[data4$LENGTH %% 3 != 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             row.names = c("sym", "non_sym"),
-                             stringsAsFactors = FALSE)
-symet_not_found
-test = fisher.test(symet_not_found)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symm_not_found")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-symet_not_found = data.frame("sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             "non_sQTL" = c(length(data4[data4$LENGTH %% 3 == 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data4[data4$LENGTH %% 3 != 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                             row.names = c("sym", "non_sym"),
-                             stringsAsFactors = FALSE)
-symet_not_found
-test = fisher.test(symet_not_found)
-pval = c(pval, test$p.value)
-trait = c(trait, "Symm_not_found")
-pair = c(pair, "3 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-pa = c("1", "2", "3", "4", "1", "2", "3", "4")
-tra = c("Symmetric", "Symmetric", "Symmetric", "Symmetric", "Non symmetric", "Non symmetric", "Non symmetric", "Non symmetric")
-count = c(length(data1[data1$LENGTH %% 3 == 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data1[data1$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),
-          length(data2[data2$LENGTH %% 3 == 0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data2[data2$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),
-          length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data3[data3$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),
-          length(data4[data4$LENGTH %% 3 == 0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data4[data4$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH), 
-          length(data1[data1$LENGTH %% 3 != 0 & data1$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data1[data1$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),  
-          length(data2[data2$LENGTH %% 3 !=  0 & data2$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data2[data2$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),
-          length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data3[data3$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH),  
-          length(data4[data4$LENGTH %% 3 !=  0 & data4$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)/length(data4[data4$ALIGNED.SEQ == "EXON NOT FOUND", ]$LENGTH))
-
-to_draw = data.frame()
-to_draw = cbind(tra, count)
-to_draw = cbind(to_draw, pa)
-to_draw
-to_draw = data.frame(to_draw)
-colnames(to_draw) = c("trait", "proportion", "Group")
-to_draw$proportion = as.numeric(to_draw$proportion)
-to_draw 
-ggplot(to_draw, aes(fill = as.factor(Group), x=trait, y=proportion )) + gtex_v8_figure_theme() + geom_col(position = position_dodge())  +  theme(axis.text.x = element_text(vjust = 0.5, hjust=1, size = 7), legend.text = element_text(size=7), axis.title.y = element_text(size = 8), axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("proportion") + labs(fill='Group') + guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5)))
-ggsave("symmetric_not_found_bars_among_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 
 
@@ -2069,94 +333,11 @@ hel
 test = fisher.test(hel)
 pval = c(pval, test$p.value)
 trait = c(trait, "Helix")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
-
-hel = data.frame("sQTL" = c(length(data1[data1$HELIX == "True",]$HELIX), length(data1[data1$HELIX != "True",]$HELIX)),
-                 "non_sQTL" = c(length(data3[data3$HELIX == "True",]$HELIX), length(data3[data3$HELIX != "True",]$HELIX)),
-                 #"non_sQTL" = c(length(data3[data3$HELIX ="True",]$HELIX), length(data3[data3$HELIX !"True",]$HELIX)),
-                 row.names = c("helix", "no_helix"),
-                 stringsAsFactors = FALSE)
-
-hel
-test = fisher.test(hel)
-pval = c(pval, test$p.value)
-trait = c(trait, "Helix")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-hel = data.frame("sQTL" = c(length(data1[data1$HELIX == "True",]$HELIX), length(data1[data1$HELIX != "True",]$HELIX)),
-                 "non_sQTL" = c(length(data4[data4$HELIX == "True",]$HELIX), length(data4[data4$HELIX != "True",]$HELIX)),
-                 #"non_sQTL" = c(length(data3[data3$HELIX ="True",]$HELIX), length(data3[data3$HELIX !"True",]$HELIX)),
-                 row.names = c("helix", "no_helix"),
-                 stringsAsFactors = FALSE)
-
-hel
-test = fisher.test(hel)
-pval = c(pval, test$p.value)
-trait = c(trait, "Helix")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-hel = data.frame("sQTL" = c(length(data2[data2$HELIX == "True",]$HELIX), length(data2[data2$HELIX != "True",]$HELIX)),
-                 "non_sQTL" = c(length(data3[data3$HELIX == "True",]$HELIX), length(data3[data3$HELIX != "True",]$HELIX)),
-                 #"non_sQTL" = c(length(data3[data3$HELIX ="True",]$HELIX), length(data3[data3$HELIX !"True",]$HELIX)),
-                 row.names = c("helix", "no_helix"),
-                 stringsAsFactors = FALSE)
-
-hel
-test = fisher.test(hel)
-pval = c(pval, test$p.value)
-trait = c(trait, "Helix")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-hel = data.frame("sQTL" = c(length(data2[data2$HELIX == "True",]$HELIX), length(data2[data2$HELIX != "True",]$HELIX)),
-                 "non_sQTL" = c(length(data4[data4$HELIX == "True",]$HELIX), length(data4[data4$HELIX != "True",]$HELIX)),
-                 #"non_sQTL" = c(length(data3[data3$HELIX ="True",]$HELIX), length(data3[data3$HELIX !"True",]$HELIX)),
-                 row.names = c("helix", "no_helix"),
-                 stringsAsFactors = FALSE)
-
-hel
-test = fisher.test(hel)
-pval = c(pval, test$p.value)
-trait = c(trait, "Helix")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-hel = data.frame("sQTL" = c(length(data3[data3$HELIX == "True",]$HELIX), length(data3[data3$HELIX != "True",]$HELIX)),
-                 "non_sQTL" = c(length(data4[data4$HELIX == "True",]$HELIX), length(data4[data4$HELIX != "True",]$HELIX)),
-                 #"non_sQTL" = c(length(data3[data3$HELIX ="True",]$HELIX), length(data3[data3$HELIX !"True",]$HELIX)),
-                 row.names = c("helix", "no_helix"),
-                 stringsAsFactors = FALSE)
-
-hel
-test = fisher.test(hel)
-pval = c(pval, test$p.value)
-trait = c(trait, "Helix")
-pair = c(pair, "3 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-
-
 
 
 # SHEETS TESTS
@@ -2170,87 +351,7 @@ she
 test = fisher.test(she)
 pval = c(pval, test$p.value)
 trait = c(trait, "Sheet")
-pair = c(pair, "1 vs 2")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-she = data.frame("sQTL" = c(length(data1[data1$SHEET == "True",]$SHEET), length(data1[data1$SHEET != "True",]$SHEET)),
-                 "non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 #"non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 row.names = c("sheet", "no_sheet"),
-                 stringsAsFactors = FALSE)
-
-she
-test = fisher.test(she)
-pval = c(pval, test$p.value)
-trait = c(trait, "Sheet")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-she = data.frame("sQTL" = c(length(data1[data1$SHEET == "True",]$SHEET), length(data1[data1$SHEET != "True",]$SHEET)),
-                 "non_sQTL" = c(length(data4[data4$SHEET == "True",]$SHEET), length(data4[data4$SHEET != "True",]$SHEET)),
-                 #"non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 row.names = c("sheet", "no_sheet"),
-                 stringsAsFactors = FALSE)
-
-she
-test = fisher.test(she)
-pval = c(pval, test$p.value)
-trait = c(trait, "Sheet")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-she = data.frame("sQTL" = c(length(data2[data2$SHEET == "True",]$SHEET), length(data2[data2$SHEET != "True",]$SHEET)),
-                 "non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 #"non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 row.names = c("sheet", "no_sheet"),
-                 stringsAsFactors = FALSE)
-
-she
-test = fisher.test(she)
-pval = c(pval, test$p.value)
-trait = c(trait, "Sheet")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-she = data.frame("sQTL" = c(length(data2[data2$SHEET == "True",]$SHEET), length(data2[data2$SHEET != "True",]$SHEET)),
-                 "non_sQTL" = c(length(data4[data4$SHEET == "True",]$SHEET), length(data4[data4$SHEET != "True",]$SHEET)),
-                 #"non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 row.names = c("sheet", "no_sheet"),
-                 stringsAsFactors = FALSE)
-
-she
-test = fisher.test(she)
-pval = c(pval, test$p.value)
-trait = c(trait, "Sheet")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-she = data.frame("sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 "non_sQTL" = c(length(data4[data4$SHEET == "True",]$SHEET), length(data4[data4$SHEET != "True",]$SHEET)),
-                 #"non_sQTL" = c(length(data3[data3$SHEET == "True",]$SHEET), length(data3[data3$SHEET != "True",]$SHEET)),
-                 row.names = c("sheet", "no_sheet"),
-                 stringsAsFactors = FALSE)
-
-she
-test = fisher.test(she)
-pval = c(pval, test$p.value)
-trait = c(trait, "Sheet")
-pair = c(pair, "3 vs 4")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
@@ -2269,91 +370,12 @@ turn
 test = fisher.test(turn)
 pval = c(pval, test$p.value)
 trait = c(trait, "Turn")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
 
-turn = data.frame("sQTL" = c(length(data1[data1$TURN == "True",]$TURN), length(data1[data1$TURN != "True",]$TURN)),
-                  "non_sQTL" = c(length(data3[data3$TURN == "True",]$TURN), length(data3[data3$TURN != "True",]$TURN)),
-                  #"non_sQTL" = c(length(data3[data2$TURN == "True",]$TURN), length(data3[data2$TURN != "True",]$TURN)),
-                  row.names = c("turn", "no_turn"),
-                  stringsAsFactors = FALSE)
-
-turn
-test = fisher.test(turn)
-pval = c(pval, test$p.value)
-trait = c(trait, "Turn")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-turn = data.frame("sQTL" = c(length(data1[data1$TURN == "True",]$TURN), length(data1[data1$TURN != "True",]$TURN)),
-                  "non_sQTL" = c(length(data4[data4$TURN == "True",]$TURN), length(data4[data4$TURN != "True",]$TURN)),
-                  #"non_sQTL" = c(length(data3[data2$TURN == "True",]$TURN), length(data3[data2$TURN != "True",]$TURN)),
-                  row.names = c("turn", "no_turn"),
-                  stringsAsFactors = FALSE)
-
-turn
-test = fisher.test(turn)
-pval = c(pval, test$p.value)
-trait = c(trait, "Turn")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-turn = data.frame("sQTL" = c(length(data2[data2$TURN == "True",]$TURN), length(data2[data2$TURN != "True",]$TURN)),
-                  "non_sQTL" = c(length(data3[data3$TURN == "True",]$TURN), length(data3[data3$TURN != "True",]$TURN)),
-                  #"non_sQTL" = c(length(data3[data2$TURN == "True",]$TURN), length(data3[data2$TURN != "True",]$TURN)),
-                  row.names = c("turn", "no_turn"),
-                  stringsAsFactors = FALSE)
-
-turn
-test = fisher.test(turn)
-pval = c(pval, test$p.value)
-trait = c(trait, "Turn")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-turn = data.frame("sQTL" = c(length(data2[data2$TURN == "True",]$TURN), length(data2[data2$TURN != "True",]$TURN)),
-                  "non_sQTL" = c(length(data4[data4$TURN == "True",]$TURN), length(data4[data4$TURN != "True",]$TURN)),
-                  #"non_sQTL" = c(length(data3[data2$TURN == "True",]$TURN), length(data3[data2$TURN != "True",]$TURN)),
-                  row.names = c("turn", "no_turn"),
-                  stringsAsFactors = FALSE)
-
-turn
-test = fisher.test(turn)
-pval = c(pval, test$p.value)
-trait = c(trait, "Turn")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-turn = data.frame("sQTL" = c(length(data3[data3$TURN == "True",]$TURN), length(data3[data3$TURN != "True",]$TURN)),
-                  "non_sQTL" = c(length(data4[data4$TURN == "True",]$TURN), length(data4[data4$TURN != "True",]$TURN)),
-                  #"non_sQTL" = c(length(data3[data2$TURN == "True",]$TURN), length(data3[data2$TURN != "True",]$TURN)),
-                  row.names = c("turn", "no_turn"),
-                  stringsAsFactors = FALSE)
-
-turn
-test = fisher.test(turn)
-pval = c(pval, test$p.value)
-trait = c(trait, "Turn")
-pair = c(pair, "3 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
 
 #TRANSMEMBRANE TEST
 
@@ -2366,116 +388,29 @@ trans
 test = fisher.test(trans)
 pval = c(pval, test$p.value)
 trait = c(trait, "Transmembrane")
-pair = c(pair, "1 vs 2")
+# pair = c(pair, "1 vs 2")
 conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
 
-trans= data.frame("sQTL" = c(length(data1[data1$TRANSMEMBRANE == "True",]$LENGTH), length(data1[data1$TRANSMEMBRANE != "True",]$LENGTH)),
-                  "non_sQTL" = c(length(data3[data3$TRANSMEMBRANE == "True",]$LENGTH), length(data3[data3$TRANSMEMBRANE != "True",]$LENGTH)),
-                  #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                  row.names = c("trans", "non_trans"),
-                  stringsAsFactors = FALSE)
-trans
-test = fisher.test(trans)
-pval = c(pval, test$p.value)
-trait = c(trait, "Transmembrane")
-pair = c(pair, "1 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-trans= data.frame("sQTL" = c(length(data1[data1$TRANSMEMBRANE == "True",]$LENGTH), length(data1[data1$TRANSMEMBRANE != "True",]$LENGTH)),
-                  "non_sQTL" = c(length(data4[data4$TRANSMEMBRANE == "True",]$LENGTH), length(data4[data4$TRANSMEMBRANE != "True",]$LENGTH)),
-                  #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                  row.names = c("trans", "non_trans"),
-                  stringsAsFactors = FALSE)
-trans
-test = fisher.test(trans)
-pval = c(pval, test$p.value)
-trait = c(trait, "Transmembrane")
-pair = c(pair, "1 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-trans= data.frame("sQTL" = c(length(data2[data2$TRANSMEMBRANE == "True",]$LENGTH), length(data2[data2$TRANSMEMBRANE != "True",]$LENGTH)),
-                  "non_sQTL" = c(length(data3[data3$TRANSMEMBRANE == "True",]$LENGTH), length(data3[data3$TRANSMEMBRANE != "True",]$LENGTH)),
-                  #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                  row.names = c("trans", "non_trans"),
-                  stringsAsFactors = FALSE)
-trans
-test = fisher.test(trans)
-pval = c(pval, test$p.value)
-trait = c(trait, "Transmembrane")
-pair = c(pair, "2 vs 3")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-trans= data.frame("sQTL" = c(length(data2[data2$TRANSMEMBRANE == "True",]$LENGTH), length(data2[data2$TRANSMEMBRANE != "True",]$LENGTH)),
-                  "non_sQTL" = c(length(data4[data4$TRANSMEMBRANE == "True",]$LENGTH), length(data4[data4$TRANSMEMBRANE != "True",]$LENGTH)),
-                  #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                  row.names = c("trans", "non_trans"),
-                  stringsAsFactors = FALSE)
-trans
-test = fisher.test(trans)
-pval = c(pval, test$p.value)
-trait = c(trait, "Transmembrane")
-pair = c(pair, "2 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-trans= data.frame("sQTL" = c(length(data3[data3$TRANSMEMBRANE == "True",]$LENGTH), length(data3[data3$TRANSMEMBRANE != "True",]$LENGTH)),
-                  "non_sQTL" = c(length(data4[data4$TRANSMEMBRANE == "True",]$LENGTH), length(data4[data4$TRANSMEMBRANE != "True",]$LENGTH)),
-                  #"non_sQTL" = c(length(data3[data3$LENGTH %% 3 == 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH), length(data3[data3$LENGTH %% 3 != 0 & data3$ALIGNED.SEQ == "EXON NOT FOUND",]$LENGTH)),
-                  row.names = c("trans", "non_trans"),
-                  stringsAsFactors = FALSE)
-trans
-test = fisher.test(trans)
-pval = c(pval, test$p.value)
-trait = c(trait, "Transmembrane")
-pair = c(pair, "3 vs 4")
-conf_low = c(conf_low, test$conf.int[1])
-conf_top = c(conf_top, test$conf.int[2])
-stat = c(stat, test$estimate)
-test_type = c(test_type, "fisher")
-
-
-# #DOMAINS ANALYSIS
-# ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="sQTL"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non sQTL"), stat = "count", alpha=0.3)
-# table(data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[]", ]$DOMAIN)[table(data$DOMAIN) >= 2]
-# table(data2[data2$DOMAIN != "Disordered  " & data2$DOMAIN != "", ]$DOMAIN)[table(data2$DOMAIN) >= 2]
-
-
-
-# for (i in seq(1, length(pval), by=3)){
-#           print(pval[i:(i+2)])
-#           pval[i:(i+2)] = p.adjust(pval[i:(i+2)], method="hochberg")
-# }
 
 
 #pval = p.adjust(pval, method="hochberg")
 to_draw = data.frame()
 to_draw = cbind(trait, log10(pval))
-to_draw = cbind(to_draw, pair)
+# to_draw = cbind(to_draw, pair)
 to_draw = cbind(to_draw, conf_low)
 to_draw = cbind(to_draw, conf_top)
 to_draw = cbind(to_draw, stat)
 to_draw = cbind(to_draw, test_type)
 to_draw
-colnames(to_draw) = c("trait", "pval", "pair", "conf_low", "conf_top", "statistics", "test_type")
+colnames(to_draw) = c("trait", "pval", "conf_low", "conf_top", "statistics", "test_type")
 to_draw = data.frame(to_draw)
 to_draw$pval = -as.numeric(to_draw$pval)
 to_draw$pair
-groups = unlist(strsplit(to_draw$pair, ' vs '))
-groups
+# groups = unlist(strsplit(to_draw$pair, ' vs '))
+# groups
 to_draw$group1 = as.factor(groups[seq(from=1, to=length(groups), by=2)])
 to_draw$group2 = as.factor(groups[seq(from=2, to=length(groups), by=2)])
 View(to_draw)
@@ -2492,7 +427,7 @@ line = replicate(length(pval), 1.5)
 
 
 
-gghistogram(to_draw, x = "trait", y="pval", rug = F, color = "pair", fill = "pair", stat="identity", position = "dodge")  + 
+gghistogram(to_draw, x = "trait", y="pval", rug = F,  stat="identity", position = "dodge")  + 
         geom_hline(yintercept = line, linetype = "dashed") +
         theme(axis.text.x = element_text(angle = 90))
 
@@ -2501,97 +436,25 @@ ggsave("statistical_summary_all_groups.png", path = "Data/visuals/", height = 5.
 
 
 
-# ggplot(to_draw, aes(fill = as.factor(pair), x=trait, y=pval )) + 
-#         geom_col(position = position_dodge())  + geom_hline(yintercept = line) + 
-#         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 7), 
-#               legend.text = element_text(size=7), axis.title.y = element_text(size = 8), 
-#               axis.title.x=element_blank(), legend.position = c(0.9, 0.8)) + ylab("-log10(p_value)") + 
-#         labs(fill='Pairs') + 
-#         guides(shape = guide_legend(override.aes = list(size = 0.5)),color = guide_legend(override.aes = list(size = 0.5))) + gtex_v8_figure_theme()
 
 line1 = replicate(length(pval), 0.0)
 
-ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "fisher" , ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 2                                                                Enrichment in group 1\n log(odd_ratio)")+
-        coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 2") + gtex_v8_figure_theme() + guides(alpha = FALSE)
-ggsave("statistical_summary_fisher_groups_1_2.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "1 vs 3" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + ylab("Enrichment in group 3                                                                Enrichment in group 1\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 3") + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_1_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "1 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 4                                                                Enrichment in group 1\n log(odd_ratio)")+coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_1_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "2 vs 3" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 3                                                                                                        Enrichment in group 2\n log(odd_ratio)")+coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_2_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "2 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + ylab("Enrichment in group 4                                                                                                   Enrichment in group 2\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_2_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 4                                                                Enrichment in group 3\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("3 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_3_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+ggplot(to_draw[to_draw$test_type == "fisher" , ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
+        geom_pointrange(aes(ymin = log(conf_low), ymax = log(conf_top))) +
+        ylab("Enrichment in group decreasing                                                                Enrichment in group increasing\n log(odd_ratio)")+
+        coord_flip()  + geom_hline(yintercept = line1, color="red")  + gtex_v8_figure_theme() + guides(alpha = FALSE)
+ggsave("statistical_summary_fisher_groups_inc_dec.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 
-
-ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 2                                                                 Enrichment in group 1\n m1 - m2") +  coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 2") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_1_2.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "1 vs 3" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4)  + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 3                                                                 Enrichment in group 1\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 3") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_1_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "1 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                                                                 Enrichment in group 1\n m1 - m2") + coord_flip()  +geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_1_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "2 vs 3" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 3                                                                                                    Enrichment in group 2\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 3") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_2_3.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "2 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                                                                 Enrichment in group 2\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("2 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_2_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) + guides(alpha = FALSE) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                                                                                                                     Enrichment in group 3\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("3 vs 4") + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_3_4.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-
-#ggsave("statistical_summary_with_correction_sQTL_among_groups.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
+ggplot(to_draw[to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
+        geom_pointrange(aes(ymin = log(conf_low), ymax = log(conf_top))) +
+        ylab("Enrichment in group decreasing                                                                 Enrichment in group increasing\n m1 - m2") +  coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("1 vs 2") + gtex_v8_figure_theme()
+ggsave("statistical_summary_ks_groups_inc_dec.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 
-ggplot(to_draw[to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), color=pair, alpha = alpha)) +
-        facet_grid(group1 ~ group2) + 
-        geom_point(size = 4, position = position_dodge(width=0.9)) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low), 
-                          color=pair), position=position_dodge(width=0.9)) + 
-        ylab("Enrichment in trait 2                                                                 Enrichment in trait 1\n m1 - m2")+ 
-        coord_flip()  + geom_hline(yintercept = line1) + guides(alpha = FALSE) + gtex_v8_figure_theme()
-ggsave("statistical_summary_ks_groups_all.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
-
-
-
-
-ggplot(to_draw[to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), color=pair, alpha = alpha)) +
-        geom_point(size = 4, position=position_dodge2(width = 0.9)) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)), color=pair), 
-                      position=position_dodge2(width = 0.9)) + 
-        ylab("Enrichment in trait 2                                                                Enrichment in trait 1\n log(odd_ratio)")+
-        coord_flip()  + geom_hline(yintercept = line1) + 
-        facet_grid(group1 ~ group2) + guides(alpha = FALSE) + gtex_v8_figure_theme()
-ggsave("statistical_summary_fisher_groups_all.png", path = "Data/visuals/", height = 5.11, width = 7.92,device='png', dpi=700)
 
 box1 = c()
 box2 = c()
-box3 = c()
-box4 = c()
 box1 = cbind(data1$anc_psi, "AA")
 box1 = rbind(box1, cbind(data1$mean_01_psi, "AD"))
 box1 = rbind(box1, cbind(data1$der_psi, "DD"))
@@ -2604,39 +467,22 @@ box2 = rbind(box2, cbind(data2$der_psi, "DD"))
 box2 = data.frame(box2)
 box2$X1 = as.numeric(box2$X1)
 
-box3 = cbind(data3$anc_psi, "AA")
-box3 = rbind(box3, cbind(data3$mean_01_psi, "AD"))
-box3 = rbind(box3, cbind(data3$der_psi, "DD"))
-box3 = data.frame(box3)
-box3$X1 = as.numeric(box3$X1)
-
-box4 = cbind(data4$anc_psi, "AA")
-box4 = rbind(box4, cbind(data4$mean_01_psi, "AD"))
-box4 = rbind(box4, cbind(data4$der_psi, "DD"))
-box4 = data.frame(box4)
-box4$X1 = as.numeric(box4$X1)
 
 dev.off()
 plot1 = ggboxplot(box1, x="X2", y = "X1", fill="2") +  xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme() 
 plot1
-plot2 = ggboxplot(box1, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() 
+plot2 = ggboxplot(box2, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() 
+plot2
 
-plot3 = ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) +  ylab("Enrichment in group 2                   Enrichment in group 1\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
+plot3 = ggplot(to_draw[to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
+        geom_pointrange(aes(ymin = log(conf_low), ymax = log(conf_top))) + 
+        ylab("Enrichment in group decreasing                   Enrichment in group increasing\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
 
-plot4 = ggboxplot(box1, x="X2", y = "X1", fill="4")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme() 
-
-plot5 = ggboxplot(box1, x="X2", y = "X1", fill="5")+ xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme()
+plot3
 
 
-plot6 = ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "fisher", ], aes(x = trait, y = log(as.numeric(statistics)), alpha = alpha)) +
-        geom_point(size = 4) +
-        geom_errorbar(aes(ymax = log(as.numeric(conf_top)), ymin = log(as.numeric(conf_low)))) + ylab("Enrichment in group 4                   Enrichment in group 3\n log(odd_ratio)")+ coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion >50% mean PSI \nvs Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
-
-plot = arrangeGrob(plot1, plot2, plot3, plot4, plot5, plot6, widths = c(1, 1, 1),
-             layout_matrix = rbind(c(1, 2, 3), c(4, 5, 6)))
-
+plot = arrangeGrob(plot1, plot2, plot3, nrow = 1, ncol = 3)
+plot
 ggsave("fancy_statistical_summary_fisher_groups_all.png", plot=plot, path = "Data/visuals/", height = 5.11, width = 12.0,device='png', dpi=700)
 
 
@@ -2647,27 +493,19 @@ dev.off()
 
 plot1 = ggboxplot(box1, x="X2", y = "X1", fill="2")+ xlab("PSI") + ylab("Genotype") + ggtitle("Derived Higher Inclusion <50% mean PSI") + gtex_v8_figure_theme()
 
-plot2 = ggboxplot(box1, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme()
+plot2 = ggboxplot(box2, x="X2", y = "X1", fill="3")+ xlab("PSI") +  ylab("Genotype") + ggtitle("Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme()
 
-plot3 = ggplot(to_draw[to_draw$pair == "1 vs 2" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
+plot3 = ggplot(to_draw[to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
         geom_point(size = 4) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 2                   Enrichment in group 1\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
+        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group decreasing                   Enrichment in group increasing\n m1 - m2") + coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion <50% mean PSI \nvs Derived Lower Inclusion <50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = FALSE)
 
-plot4 = ggboxplot(box1, x="X2", y = "X1", fill="4") + xlab("PSI") +  ylab("Genotype")+ ggtitle("Derived Higher Inclusion >50% mean PSI") + gtex_v8_figure_theme()
-plot5 = ggboxplot(box1, x="X2", y = "X1", fill="5") +  xlab("PSI") + ylab("Genotype")+ ggtitle("Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme()
-
-
-plot6 = ggplot(to_draw[to_draw$pair == "3 vs 4" & to_draw$test_type == "ks", ], aes(x = trait, y = as.numeric(statistics), alpha = alpha)) +
-        geom_point(size = 4) +
-        geom_errorbar(aes(ymax = as.numeric(conf_top), ymin = as.numeric(conf_low))) + ylab("Enrichment in group 4                   Enrichment in group 3\n m1 - m2") +coord_flip()  + geom_hline(yintercept = line1, color="red") + ggtitle("Derived Higher Inclusion >50% mean PSI \nvs Derived Lower Inclusion >50% mean PSI") + gtex_v8_figure_theme() + guides(alpha = "none")
-
-plot = arrangeGrob(plot1, plot2, plot3, plot4, plot5, plot6, widths = c(1, 1, 1),
-                    layout_matrix = rbind(c(1, 2, 3), c(4, 5, 6)))
+plot = arrangeGrob(plot1, plot2, plot3, nrow = 1, ncol = 3)
 
 ggsave("fancy_statistical_summary_ks_groups_all.png", plot=plot, path = "Data/visuals/", height = 5.11, width =12.0,device='png', dpi=700)
 
 View(to_draw)
 
+write.csv(to_draw, "Data/to_draw_psi_groups.csv", quote=F, row.names = F)
 
 
 # 
