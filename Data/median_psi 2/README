@@ -1,0 +1,2 @@
+This directory contains the median PSI for all exons in each tissue type, calculated
+using the PSI files in the bed directory. I use the "PSI v8 protocol" files. 
