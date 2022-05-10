@@ -651,6 +651,36 @@ c_t_f = c()
   stat = c(stat, test$estimate)
   test_type = c(test_type, "fisher")
   
+  features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+               "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+               "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")  
+  is_domain_data = is.na(data[,features])
+  is_domain_data2 = is.na(data2[, features])
+  dim(is_domain_data)
+  View(is_domain_data)
+  is_domain_data$SUM = rowSums(is_domain_data)
+  is_domain_data2$SUM = rowSums(is_domain_data2)
+  is_domain_data$SUM = ifelse(is_domain_data$SUM == 21, F, T)
+  is_domain_data2$SUM = ifelse(is_domain_data2$SUM == 21, F, T)
+  
+  
+  station = data.frame("coloc" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                       "non_coloc" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
+                       row.names = c("stat", "non_stat"),
+                       stringsAsFactors = FALSE)
+  print(station)
+  test = fisher.test(station)
+  est = fisher.test(station)
+  pval = c(pval, test$p.value)
+  trait = c(trait, "Domain")
+  pair = c(pair, "coloc vs non_coloc")
+  conf_low = c(conf_low, test$conf.int[1])
+  conf_top = c(conf_top, test$conf.int[2])
+  stat = c(stat, test$estimate)
+  test_type = c(test_type, "fisher")
+  
+  mi = c(mi, 0.0)
+  ma = c(ma, 0.0)
   # #DOMAINS ANALYSIS
   # ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="coloc"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non coloc"), stat = "count", alpha=0.3) + geom_bar(data=data3[data3$DOMAIN != "['Disordered']" & data3$DOMAIN != "Actin" & data3$DOMAIN != "[]", ], aes(DOMAIN, fill="non sQTL"), stat = "count", alpha=0.3)
   # table(data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[]", ]$DOMAIN)[table(data$DOMAIN) >= 2]

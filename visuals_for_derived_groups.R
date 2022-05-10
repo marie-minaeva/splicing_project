@@ -652,6 +652,40 @@ test_type = c(test_type, "fisher")
 mi = c(mi, 0.0)
 ma = c(ma, 0.0)
 
+
+features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+             "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+             "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")  
+data[data == ""] = NA
+data2[data2 == ""] = NA
+is_domain_data = data.frame(is.na(data[,features]))
+is_domain_data2 = data.frame(is.na(data2[, features]))
+dim(is_domain_data)
+is_domain_data$SUM = rowSums(is_domain_data)
+is_domain_data2$SUM = rowSums(is_domain_data2)
+is_domain_data$SUM = ifelse(is_domain_data$SUM == length(features), F, T)
+is_domain_data2$SUM = ifelse(is_domain_data2$SUM == length(features), F, T)
+dim(is_domain_data)
+
+
+station = data.frame("higher_in" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                     "lower_in" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
+                     row.names = c("stat", "non_stat"),
+                     stringsAsFactors = FALSE)
+print(station)
+test = fisher.test(station)
+est = fisher.test(station)
+pval = c(pval, test$p.value)
+trait = c(trait, "Domain")
+pair = c(pair, "higher_in vs lower_in")
+conf_low = c(conf_low, test$conf.int[1])
+conf_top = c(conf_top, test$conf.int[2])
+stat = c(stat, test$estimate)
+test_type = c(test_type, "fisher")
+
+mi = c(mi, 0.0)
+ma = c(ma, 0.0)
+
 # #DOMAINS ANALYSIS
 # ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="higher_in"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non higher_in"), stat = "count", alpha=0.3)
 # table(data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[]", ]$DOMAIN)[table(data$DOMAIN) >= 2]

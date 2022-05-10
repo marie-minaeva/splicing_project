@@ -8,7 +8,7 @@ ncol(data_full)
 ncol(data_full_1)
 data_full = data_full[!is.na(data_full$anc_allele_freq), ]
 data_full %>% select(intersect(colnames(data_full), colnames(data_full_1))) -> data_full
-# data_full = rbind(data_full, data_full_1)
+data_full = rbind(data_full, data_full_1)
 data2 = data_full[data_full$mean_01_psi < 0.5, ]
 
 data = data_full[data_full$mean_01_psi > 0.5, ]
@@ -629,7 +629,6 @@ is_domain_data$SUM = ifelse(is_domain_data$SUM == length(features), F, T)
 is_domain_data2$SUM = ifelse(is_domain_data2$SUM == length(features), F, T)
 dim(is_domain_data)
 
-
 station = data.frame("higher_in" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
                      "lower_in" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
                      row.names = c("stat", "non_stat"),
@@ -647,6 +646,7 @@ test_type = c(test_type, "fisher")
 
 mi = c(mi, 0.0)
 ma = c(ma, 0.0)
+
 # #DOMAINS ANALYSIS
 # ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="higher_in"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non higher_in"), stat = "count", alpha=0.3)
 # table(data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[]", ]$DOMAIN)[table(data$DOMAIN) >= 2]
@@ -722,7 +722,7 @@ ggsave("statistical_summary_ks_inclusion_groups.png", path = "Data/visuals/", he
 
 
 
-write.csv(to_draw, "Data/to_draw_inclusion_groups.csv", quote=F, row.names = F)
+write.csv(to_draw, "Data/to_draw_inclusion_groups_overall.csv", quote=F, row.names = F)
 
 
 

@@ -59,7 +59,7 @@ medianDiff = function(data, func){
         return(m1-m2)
 }
 
-inv_norm <- function(x) qnorm((rank(x, na.last='keep') - 0.5)/sum(!is.na(x)))
+inv_norm <- function(x) qnorm((rank(x, na.last='keep', ties.method = "random") - 0.5)/sum(!is.na(x)))
 
 my_bootstrap = function(x, R, func, func1){
         cores=detectCores()
@@ -624,6 +624,37 @@ test_type = c(test_type, "fisher")
 mi = c(mi, 0.0)
 ma = c(ma, 0.0)
 
+features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+             "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+             "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")  
+is_domain_data = is.na(data[,features])
+is_domain_data2 = is.na(data2[, features])
+dim(is_domain_data)
+View(is_domain_data)
+is_domain_data$SUM = rowSums(is_domain_data)
+is_domain_data2$SUM = rowSums(is_domain_data2)
+is_domain_data$SUM = ifelse(is_domain_data$SUM == 21, F, T)
+is_domain_data2$SUM = ifelse(is_domain_data2$SUM == 21, F, T)
+
+
+station = data.frame("higher_in" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                     "lower_in" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
+                     row.names = c("stat", "non_stat"),
+                     stringsAsFactors = FALSE)
+print(station)
+test = fisher.test(station)
+est = fisher.test(station)
+pval = c(pval, test$p.value)
+trait = c(trait, "Domain")
+pair = c(pair, "higher_in vs lower_in")
+conf_low = c(conf_low, test$conf.int[1])
+conf_top = c(conf_top, test$conf.int[2])
+stat = c(stat, test$estimate)
+test_type = c(test_type, "fisher")
+
+mi = c(mi, 0.0)
+ma = c(ma, 0.0)
+
 # #DOMAINS ANALYSIS
 # ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="higher_in"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non higher_in"), stat = "count", alpha=0.3)
 # table(data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[]", ]$DOMAIN)[table(data$DOMAIN) >= 2]
@@ -671,7 +702,7 @@ to_draw$trait = factor(to_draw$trait, levels = trait)
 to_draw$alpha = ifelse((to_draw$test_type == "ks"  & ((to_draw$conf_low <= 0 & to_draw$conf_top >= 0) | 
                                                               (to_draw$conf_low >= 0 & to_draw$conf_top <= 0))) | 
                                (to_draw$test_type == "fisher"  & ((log(to_draw$conf_low) <= 0 & log(to_draw$conf_top >= 0)) | 
-                                                                          (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.6, 1.0)
+                                                                          (log(to_draw$conf_low) >= 0 & log(to_draw$conf_top) <= 0))), yes = 0.4, 1.0)
 to_draw[to_draw$test_type == "fisher",]$alpha = ifelse((log(to_draw[to_draw$test_type == "fisher",]$conf_low) <= 0 & log(to_draw[to_draw$test_type == "fisher",]$conf_top) >= 0) | (log(to_draw[to_draw$test_type == "fisher",]$conf_low) >= 0 & log(to_draw[to_draw$test_type == "fisher",]$conf_top) <= 0), yes = 0.4, 1.0)
 
 line1 = replicate(length(pval), 0.0)

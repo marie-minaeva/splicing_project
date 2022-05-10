@@ -8,9 +8,11 @@ library(stringr)
 
 data_non = read.csv("Data/output_non_sQTL_full.csv")
 data = read.csv("Data/output_data_coloc.csv")
-features = colnames(data_non)[50:ncol(data_non)]
-features = features[colnames(data_non)[50:ncol(data_non)] %in% colnames(data)]
-features
+colnames(data)
+head(data_non)
+features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+             "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+             "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")      
 enrich = data.frame()
 for (feature in features){
         data_non[,feature] = sapply(data_non[,feature],function(x){
@@ -23,7 +25,7 @@ for (feature in features){
         data[,feature] = ifelse(data[,feature] == '', NA, data[,feature])
         tab_non = data.frame(table(data_non[!is.na(data_non[,feature]),feature]))
         tab_non$dataset = "non_coloc"
-        
+        tab_non
         tab = data.frame(table(data[!is.na(data[,feature]),feature]))
         try(tab$dataset <- "coloc")
         station = data.frame("coloc" = c(sum(tab$Freq), length(data$GENE.NAME) - sum(tab$Freq)),
@@ -55,3 +57,21 @@ for (feature in features){
 }
 colnames(enrich) = c("feature", "p.value", "odds.ratio")
 View(enrich)
+
+
+is_domain_data = is.na(data[,features])
+is_domain_data_non = is.na(data_non[, features])
+dim(is_domain_data)
+View(is_domain_data)
+is_domain_data$SUM = rowSums(is_domain_data)
+is_domain_data_non$SUM = rowSums(is_domain_data_non)
+is_domain_data$SUM = ifelse(is_domain_data$SUM == 21, F, T)
+is_domain_data_non$SUM = ifelse(is_domain_data_non$SUM == 21, F, T)
+
+
+station = data.frame("coloc" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                     "non_coloc" = c(sum(is_domain_data_non$SUM), nrow(is_domain_data_non) - sum(is_domain_data_non$SUM)),
+                     row.names = c("stat", "non_stat"),
+                     stringsAsFactors = FALSE)
+print(station)
+test = fisher.test(station)

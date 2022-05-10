@@ -1,4 +1,6 @@
 ## parsing transeq output
+library(stringr)
+
 transeq_parse <- function(input) {
         temp = character(0)
         proteins = character(0)
@@ -22,6 +24,8 @@ transeq_parse <- function(input) {
 ## Preprocessing for alignment
 output = read.table("compl_protein_antisense_seq.txt")
 proteins = transeq_parse(output)
+print(proteins)
+proteins = proteins[!grepl("[*]", proteins)]
 ## Aligning antisense proteins
 for (k in 1:length(proteins)){
         print("Anti")

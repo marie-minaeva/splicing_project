@@ -1,4 +1,7 @@
 ## parsing transeq output
+library(stringr)
+
+
 transeq_parse <- function(input) {
         temp = character(0)        
         proteins = character(0)
@@ -22,6 +25,8 @@ transeq_parse <- function(input) {
 # Preprocessing for alignment
 output = read.table("protein_sense_seq.txt")
 proteins = transeq_parse(output)
+print(proteins)
+proteins = proteins[!grepl("[*]", proteins)]
 
 ## Aligning sense proteins
 for (k in 1:length(proteins)){

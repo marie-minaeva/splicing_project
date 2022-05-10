@@ -3,7 +3,6 @@ library(stringr)
 args <- commandArgs(trailingOnly = TRUE)
 j = as.numeric(args[1])
 data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", header=T, sep='\t')
-j=1
 ## parsing bedtools output
 bedtools_parse = function(input){
         sta = character(0)

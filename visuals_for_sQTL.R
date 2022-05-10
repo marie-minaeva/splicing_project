@@ -19,12 +19,12 @@ flag_outliers <- function(x){
 
 meanDiff = function(data, func){
   data = func(data)
-  m1 <- mean(data[data$V2=='sQTL', "totalData"])
-  m2 <- mean(data[data$V2=='non_sQTL', "totalData"])
+  m1 <- median(data[data$V2=='sQTL', "totalData"])
+  m2 <- median(data[data$V2=='non_sQTL', "totalData"])
   return(m1-m2)
 }
 
-inv_norm <- function(x) qnorm((rank(x, na.last='keep') - 0.5)/sum(!is.na(x)))
+inv_norm <- function(x) qnorm((rank(x, na.last='keep', ties.method = "random") - 0.5)/sum(!is.na(x)))
 
 my_bootstrap = function(x, R, func, func1){
   cores=detectCores()
@@ -67,10 +67,11 @@ ks_stat = function(x, y){
   print(mean(totalData[totalData$V2 == "sQTL", 'totalData']) - mean(totalData[totalData$V2 == "non_sQTL", 'totalData']))
   
   totalBoot = my_bootstrap(totalData, R=1000, meanDiff, select_samples)
-  totalBootCI = quantile(totalBoot, probs=c(0.05, 0.95))
+  totalBootCI = quantile(totalBoot, probs=c(0.05, 0.5, 0.95))
   conf_low = totalBootCI[1]
-  conf_top = totalBootCI[2]
-  stat = mean(totalData[totalData$V2 == "sQTL", 'totalData']) - mean(totalData[totalData$V2 == "non_sQTL", 'totalData'])
+  conf_top = totalBootCI[3]
+  # stat = mean(totalData[totalData$V2 == "sQTL", 'totalData']) - mean(totalData[totalData$V2 == "non_sQTL", 'totalData'])
+  stat = totalBootCI[2]
   print(c(pval, stat, conf_low, conf_top))
   return(c(pval, stat, conf_low, conf_top))
 }
@@ -79,7 +80,9 @@ ks_stat = function(x, y){
 
 
 
-data = read.csv("Data/combined_sQTL_data.csv")
+
+
+data = read.csv("Data/output_top_sQTL.csv")
 data2 = read.csv("Data/output_non_sQTL_full.csv")
 
 ncol(data)
@@ -553,6 +556,38 @@ conf_low = c(conf_low, test$conf.int[1])
 conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
+
+features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+             "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+             "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")  
+data[data == ""] = NA
+data2[data2 == ""] = NA
+is_domain_data = data.frame(is.na(data[,features]))
+is_domain_data2 = data.frame(is.na(data2[, features]))
+dim(is_domain_data)
+is_domain_data$SUM = rowSums(is_domain_data)
+is_domain_data2$SUM = rowSums(is_domain_data2)
+is_domain_data$SUM = ifelse(is_domain_data$SUM == length(features), F, T)
+is_domain_data2$SUM = ifelse(is_domain_data2$SUM == length(features), F, T)
+dim(is_domain_data)
+
+station = data.frame("sQTL" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                     "non_sQTL" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
+                     row.names = c("stat", "non_stat"),
+                     stringsAsFactors = FALSE)
+print(station)
+test = fisher.test(station)
+test
+pval = c(pval, test$p.value)
+trait = c(trait, "Domain")
+pair = c(pair, "sQTL vs non_sQTL")
+conf_low = c(conf_low, test$conf.int[1])
+conf_top = c(conf_top, test$conf.int[2])
+stat = c(stat, test$estimate)
+test_type = c(test_type, "fisher")
+
+mi = c(mi, 0.0)
+ma = c(ma, 0.0)
 
 # #DOMAINS ANALYSIS
 # ggplot() + geom_bar(data=data[data$DOMAIN != "['Disordered']" & data$DOMAIN != "[] ", ], aes(DOMAIN, fill="sQTL"), stat = "count", alpha=0.3) + geom_bar(data=data2[data2$DOMAIN != "['Disordered']" & data2$DOMAIN != "[]", ], aes(DOMAIN, fill="non sQTL"), stat = "count", alpha=0.3)

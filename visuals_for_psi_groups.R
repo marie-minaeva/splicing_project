@@ -1,15 +1,7 @@
 setwd("~/splicing_project/")
 data_full = read.csv("Data/combined_sQTL_data.csv")
-data_non_s = read.csv("Data/output_non_sQTL_full.csv")
-data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", sep='\t', header = T)
 
-ncol(data_full)
-ncol(data_non_s)
-rbind(data_full, data_non_s)
-colnames(data)
-nrow(data)
-nrow(data_non_s)
-data[!data$gene_symbol %in% data_non_s$GENE.NAME, ]$gene_symbol
+
 nrow(data_full)
 data_full = data_full[!is.na(data_full$anc_allele_freq), ]
 nrow(data_full)
@@ -51,12 +43,12 @@ flag_outliers <- function(x){
 
 meanDiff = function(data, func){
         data = func(data)
-        m1 <- mean(data[data$V2=='sQTL', "totalData"])
-        m2 <- mean(data[data$V2=='non_sQTL', "totalData"])
+        m1 <- meandian(data[data$V2=='sQTL', "totalData"])
+        m2 <- median(data[data$V2=='non_sQTL', "totalData"])
         return(m1-m2)
 }
 
-inv_norm <- function(x) qnorm((rank(x, na.last='keep') - 0.5)/sum(!is.na(x)))
+inv_norm <- function(x) qnorm((rank(x, na.last='keep', ties.method = "random") - 0.5)/sum(!is.na(x)))
 
 my_bootstrap = function(x, R, func, func1){
         cores=detectCores()
@@ -108,10 +100,10 @@ ks_stat = function(x, y){
         
         totalBoot = my_bootstrap(totalData, R=1000, meanDiff, select_samples)
         #totalBoot = boot(totalData, statistic = meanDiff, R = 10000)
-        totalBootCI = quantile(totalBoot, probs=c(0.05, 0.95))
+        totalBootCI = quantile(totalBoot, probs=c(0.05, 0.5, 0.95))
         conf_low = totalBootCI[1]
-        conf_top = totalBootCI[2]
-        stat = mean(totalData[totalData$V2 == "sQTL", 'totalData']) - mean(totalData[totalData$V2 == "non_sQTL", 'totalData'])
+        conf_top = totalBootCI[3]
+        stat = totalBootCI[2]
         print(c(pval, stat, conf_low, conf_top))
         return(c(pval, stat, conf_low, conf_top))
 }
@@ -394,6 +386,38 @@ conf_top = c(conf_top, test$conf.int[2])
 stat = c(stat, test$estimate)
 test_type = c(test_type, "fisher")
 
+features = c("DOMAIN", "TRANSMEMBRANE", "MOTIF", "TOPO_DOM", "ACT_SITE", "MOD_RES",
+             "REGION", "REPEAT", "TRANSMEM", "NP_BIND", "DNA_BIND", "CROSSLNK", 
+             "ZN_FING", "METAL", "SITE", "INTRAMEM", "LIPID")  
+data[data == ""] = NA
+data2[data2 == ""] = NA
+is_domain_data = is.na(data[,features])
+is_domain_data2 = is.na(data2[, features])
+dim(is_domain_data2)
+View(is_domain_data)
+is_domain_data$SUM = rowSums(is_domain_data)
+is_domain_data2$SUM = rowSums(is_domain_data2)
+is_domain_data$SUM = ifelse(is_domain_data$SUM == length(features), F, T)
+is_domain_data2$SUM = ifelse(is_domain_data2$SUM == length(features), F, T)
+
+
+station = data.frame("sQTL" = c(sum(is_domain_data$SUM), nrow(is_domain_data) - sum(is_domain_data$SUM)),
+                     "non_sQTL" = c(sum(is_domain_data2$SUM), nrow(is_domain_data2) - sum(is_domain_data2$SUM)),
+                     row.names = c("stat", "non_stat"),
+                     stringsAsFactors = FALSE)
+print(station)
+test = fisher.test(station)
+est = fisher.test(station)
+pval = c(pval, test$p.value)
+trait = c(trait, "Domain")
+# pair = c(pair, "higher_in vs lower_in")
+conf_low = c(conf_low, test$conf.int[1])
+conf_top = c(conf_top, test$conf.int[2])
+stat = c(stat, test$estimate)
+test_type = c(test_type, "fisher")
+
+mi = c(mi, 0.0)
+ma = c(ma, 0.0)
 
 
 #pval = p.adjust(pval, method="hochberg")

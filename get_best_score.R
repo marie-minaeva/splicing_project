@@ -64,6 +64,8 @@ output = read.table("compl_protein_antisense_seq.txt")
 proteins_anti = transeq_parse(output)
 output = read.table("protein_sense_seq.txt")
 proteins = transeq_parse(output)
+proteins = proteins[!grepl("[*]", proteins)]
+proteins_anti = proteins_anti[!grepl("[*]", proteins_anti)]
 files = c("alignment_sense_1.water", "alignment_sense_2.water", "alignment_sense_3.water", "alignment_sense_4.water", "alignment_sense_5.water", "alignment_sense_6.water", "alignment_antisense_1.water", "alignment_antisense_2.water", "alignment_antisense_3.water", "alignment_antisense_4.water", "alignment_antisense_5.water", "alignment_antisense_6.water")
 scores = numeric(0)
 if (file.exists("alignment_sense_1.water") || file.exists("alignment_sense_2.water") || file.exists("alignment_sense_3.water") || file.exists("alignment_sense_4.water") || file.exists("alignment_sense_5.water") || file.exists("alignment_sense_6.water") || file.exists("alignment_antisense_1.water") || file.exists("alignment_antisense_2.water") || file.exists("alignment_antisense_3.water") || file.exists("alignment_antisense_4.water") || file.exists("alignment_antisense_5.water") || file.exists("alignment_antisense_6.water")){
