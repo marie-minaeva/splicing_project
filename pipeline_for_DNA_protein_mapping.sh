@@ -4,7 +4,7 @@
 # pretraining biomaRt
 Rscript get_biomart_pretrained.R
 
-for i in {1..1}
+for i in {1..3788}
 	do
 	echo This is round $i
 	# Exon extraction
@@ -14,7 +14,7 @@ for i in {1..1}
 
 	# Translation
 	echo Translation
-	transeq -frame 6 exon_seq.fa protein_sense_seq.txt
+	transeq -frame 6 -trim T exon_seq.fa protein_sense_seq.txt
 
 	# Complement sequence
 	echo Complement sequence
@@ -22,7 +22,7 @@ for i in {1..1}
 
 	# Translation of the ccomplement sequence
 	echo Translation of the ccomplement sequence
-	transeq -frame 6 compl_exon_seq.fa compl_protein_antisense_seq.txt
+	transeq -frame 6 -trim T compl_exon_seq.fa compl_protein_antisense_seq.txt
 
 	# Parsing AlphaFold
 	echo Parsing AlphaFold
