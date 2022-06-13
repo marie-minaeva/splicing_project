@@ -10,9 +10,7 @@ library(doParallel)
 library(doSNOW)
 library(ggpubr)
 
-gtex_v8_figure_theme <- function() {
-        return(theme(plot.title = element_text(face="plain",size=8), text = element_text(size=8),axis.text=element_text(size=7), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.text = element_text(size=7), legend.title = element_text(size=8)))
-}
+source("NiceFigures.R")
 
 data_sQTL = read.csv("Data/to_draw_sQTL.csv")
 data_inc = read.csv("Data/to_draw_inclusion_groups.csv")
@@ -20,22 +18,27 @@ data_inc_over = read.csv("Data/to_draw_inclusion_groups_overall.csv")
 data_psi = read.csv("Data/to_draw_psi_groups.csv")
 data_rand = read.csv("Data/to_draw_inclusion_groups_random_shuffle.csv")
 
-colnames(data_sQTL)
-colnames(data_psi)
-colnames(data_inc)
-colnames(data_inc_over)
-cols = c("trait", "pval", "conf_low", "conf_top", "statistics", "test_type", "alpha") 
-data_sQTL = data_sQTL[cols]
-data_inc = data_inc[cols]
-data_psi = data_psi[cols]
-data_rand = data_rand[cols]
-data_inc_over = data_inc_over[cols]
+
+
 
 data_sQTL$group = "sQTLs vs. non_sQTLs"
 data_psi$group = "Increasing vs. decreasing"
 data_inc$group = "Highly sQTLs vs. lowly sQTLs"
 data_inc_over$group = "Highly vs. lowly"
 data_rand$group = "Random Shuffle"
+
+cols = c("trait", "pval", "conf_low", "conf_top", "statistics", "test_type", "alpha", "group") 
+data_sQTL = data_sQTL[cols]
+data_inc = data_inc[cols]
+data_psi = data_psi[cols]
+data_rand = data_rand[cols]
+data_inc_over = data_inc_over[cols]
+View(data_sQTL)
+View(data_psi)
+View(data_inc)
+View(data_inc_over)
+View(data_rand)
+
 to_draw = rbind(data_sQTL, data_inc, data_psi, data_rand, data_inc_over)
 line1 = replicate(length(pval), 0.0)
 to_draw = to_draw[to_draw$trait != "Helix" & to_draw$trait != "Turn" & to_draw$trait != "Sheet",]
