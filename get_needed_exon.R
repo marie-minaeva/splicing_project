@@ -2,7 +2,7 @@ library(stringr)
 
 args <- commandArgs(trailingOnly = TRUE)
 j = as.numeric(args[1])
-data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", header=T, sep='\t')
+data = read.table("Data/top_sQTLs_top_coloc.tsv", header=T, sep='\t')
 ## parsing bedtools output
 bedtools_parse = function(input){
         sta = character(0)
@@ -38,6 +38,7 @@ exons = unlist(res[3])
 # for non sQTL
 pos = as.numeric(unlist(str_split(data$top_pid[j],pattern = "_"))[2])
 pos
+
 ## needed exon extraction
 # print(data$Exon_coord[j])
 # needed_coords = unlist(strsplit(data$Exon_coord[j],split = "_"))[2:3]
@@ -56,4 +57,5 @@ print(stops[pos])
 write(pos, "exon_meta.txt")
 needed_exon = exons[pos]
 print(needed_exon)
+needed_exon = paste0(">", unlist(str_split(data$top_pid[j],pattern = "_"))[1], "\n", needed_exon)
 write(needed_exon, "exon_seq.fa")

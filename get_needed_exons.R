@@ -4,7 +4,7 @@ library(stringr)
 args <- commandArgs(trailingOnly = TRUE)
 j = as.numeric(args[1])
 
-data = read.table("Data/cross_tissue_nonsignificant_genes.tsv", header=T, sep='\t')
+data = read.table("Data/top_sQTLs_top_coloc.tsv", header=T, sep='\t')
 # Gene name extraction
 #gene_name = unlist(strsplit(data$phenotype_id[j],split = "_"))[1]
 # for non sQTL
